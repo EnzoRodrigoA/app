@@ -1,4 +1,3 @@
-import { useThemeColor } from "@/hooks/use-theme-color";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import { Text } from "react-native";
@@ -10,6 +9,7 @@ import Animated, {
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
+import { useThemeColor } from "../hooks/use-theme-color";
 
 type AnimationType = "rotate" | "scale" | "bounce";
 
@@ -49,7 +49,7 @@ export function AnimatedIcon({
         true
       )
     );
-  }, []);
+  }, [animationValue, animationType, delay, repeat, rotateDeg, scaleTo]);
 
   const animatedStyle = useAnimatedStyle(() => {
     switch (animationType) {

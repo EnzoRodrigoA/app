@@ -1,8 +1,8 @@
-import { ThemedText } from "@/components/themed-text";
-import { ThemedView } from "@/components/themed-view";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, FlatList } from "react-native";
+import { ThemedText } from "../components/themed-text";
+import { ThemedView } from "../components/themed-view";
 
 interface Database {
   version: number;
@@ -25,9 +25,9 @@ export default function ApiStatus() {
 
   useEffect(() => {
     axios
-      .get<ApiResponse>("http://localhost:3030/api/v1/status") // <-- troca pela tua rota real
-      .then((res) => setData(res.data))
-      .catch((err) => console.error(err))
+      .get<ApiResponse>("https://wolfit-1.onrender.com/api/v1/status")
+      .then((response) => setData(response.data))
+      .catch((error) => console.error(error))
       .finally(() => setLoading(false));
   }, []);
 
