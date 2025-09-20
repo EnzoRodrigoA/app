@@ -1,7 +1,7 @@
 import * as React from "react";
 
-import { useThemeColor } from "@/hooks/use-theme-color";
 import { StyleSheet } from "react-native";
+import { useThemeColor } from "../hooks/use-theme-color";
 import { ThemedView } from "./themed-view";
 
 type Props = React.ComponentProps<typeof ThemedView>;
