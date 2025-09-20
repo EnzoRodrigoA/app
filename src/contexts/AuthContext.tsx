@@ -1,5 +1,12 @@
-import axios from "axios";
-import { createContext, ReactNode, useContext, useState } from "react";
+import api from "@/services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  createContext,
+  ReactNode,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 type AuthContextType = {
   isLoggedIn: boolean;
@@ -9,24 +16,38 @@ type AuthContextType = {
     email: string,
     password: string
   ) => Promise<void>;
+  token: string | null;
   logout: () => void;
+  loading: boolean;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const api = axios.create({
-  baseURL: "https://wolfit-1.onrender.com/api/v1",
-  headers: { "Content-Type": "application/json" },
-});
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadToken() {
+      const storedToken = await AsyncStorage.getItem("authToken");
+      if (storedToken) {
+        setToken(storedToken);
+        setIsLoggedIn(true);
+      }
+      setLoading(false);
+    }
+    loadToken();
+  }, []);
 
   async function login(email: string, password: string) {
     try {
       const response = await api.post("/sessions", { email, password });
-      console.log("Login bem-sucedido:", response.data);
+      const userToken = response.data.token;
+      setToken(userToken);
       setIsLoggedIn(true);
+
+      await AsyncStorage.setItem("authToken", userToken);
     } catch (error: any) {
       console.error("Erro no login:", error.response?.data || error.message);
     }
@@ -39,8 +60,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email,
         password,
       });
-      console.log("Cadastro bem-sucedido:", response.data);
+      const userToken = response.data.token;
+      setToken(userToken);
       setIsLoggedIn(true);
+      await AsyncStorage.setItem("authToken", userToken);
     } catch (error: any) {
       console.error(
         "Erro ao cadastrar:",
@@ -49,12 +72,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  function logout() {
+  async function logout() {
     setIsLoggedIn(false);
+    setToken(null);
+    await AsyncStorage.removeItem("authToken");
   }
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, login, logout, register }}>
+    <AuthContext.Provider
+      value={{ isLoggedIn, login, logout, register, token, loading }}
+    >
       {children}
     </AuthContext.Provider>
   );

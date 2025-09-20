@@ -41,7 +41,7 @@ describe("Login Screen", () => {
     expect(getByText("Senha incorreta")).toBeTruthy();
   });
 
-  it("With valid inputs", async () => {
+  it("With valid inputs but invalid credentials", async () => {
     const { getByText, getByPlaceholderText, queryByText } = render(<Login />);
     const emailInput = getByPlaceholderText("Digite seu email");
     const passwordInput = getByPlaceholderText("Digite sua senha");

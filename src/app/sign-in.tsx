@@ -62,6 +62,7 @@ export default function Login() {
 
       <ThemedInput
         label="Email"
+        autoCapitalize="none"
         placeholder="Digite seu email"
         value={email}
         onChangeText={setEmail}
