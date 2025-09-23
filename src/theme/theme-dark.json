@@ -1,0 +1,17 @@
+{
+  "background-basic-color-1": "#0D0D0D",
+  "background-basic-color-2": "#1A1A1A",
+  "background-basic-color-3": "#262626",
+  "background-basic-color-4": "#333333",
+
+  "text-basic-color": "#FFFFFF",
+  "text-hint-color": "#9CA3AF",
+  "text-disabled-color": "#6B7280",
+  "text-control-color": "#FFFFFF",
+
+  "color-primary-500": "#4B5AE3",
+  "color-success-500": "#2FE259",
+  "color-info-500": "#38B6FF",
+  "color-warning-500": "#FFB300",
+  "color-danger-500": "#FF3D2E"
+}

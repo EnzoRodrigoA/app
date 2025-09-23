@@ -1,107 +1,138 @@
-import { AnimatedIcon } from "@/components/animated-icon";
-import { LineChartComponent } from "@/components/BarChart";
 import ParallaxScrollView from "@/components/parallax-scroll-view";
-import { ThemedOverlayCard } from "@/components/themed-overlay-card";
-import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Image } from "expo-image";
-import { Link } from "expo-router";
-import { StyleSheet } from "react-native";
+import { Button, Card, Text, useTheme } from "@ui-kitten/components";
+import { FlatList, StyleSheet, View } from "react-native";
 import "react-native-gesture-handler";
 import "react-native-reanimated";
 
+const tips = [
+  { id: "1", title: "Hidrate-se antes do treino", emoji: "💧" },
+  { id: "2", title: "Faça alongamento", emoji: "🧘‍♂️" },
+  { id: "3", title: "Durma bem", emoji: "😴" },
+];
+
+const today = new Date();
+const options: Intl.DateTimeFormatOptions = {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+};
+let todayString = today.toLocaleDateString("pt-BR", options);
+todayString = todayString.charAt(0).toUpperCase() + todayString.slice(1);
+
 export default function HomeScreen() {
+  const theme = useTheme();
+
+  const renderTip = ({ item }: any) => (
+    <Card style={styles.tipCard} status="info">
+      <Text category="s1">
+        {item.emoji} {item.title}
+      </Text>
+    </Card>
+  );
+
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: "#A1CEDC", dark: "#1D3D47" }}
-      headerImage={
-        <Image
-          source={require("@/assets/images/partial-react-logo.png")}
-          style={styles.reactLogo}
-        />
-      }
+      headerBackgroundColor={{ light: "transparent", dark: "transparent" }}
     >
-      <ThemedView style={styles.titleContainer}>
-        <ThemedOverlayCard style={{ width: "55%" }}>
-          <ThemedText type="defaultSemiBold">Treino do dia!</ThemedText>
-          <AnimatedIcon emoji="🏋️" animationType="rotate" />
-        </ThemedOverlayCard>
-        <ThemedOverlayCard style={{ width: "55%" }}>
-          <ThemedText type="defaultSemiBold">Ofensiva</ThemedText>
-          <AnimatedIcon emoji="🔥" animationType="scale" delay={1000} />
-        </ThemedOverlayCard>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedOverlayCard>
-          <ThemedText type="subtitle">Dashboard</ThemedText>
-          <LineChartComponent />
-        </ThemedOverlayCard>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedOverlayCard>
-          <Link href="/modal">
-            <Link.Trigger>
-              <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-            </Link.Trigger>
-            <Link.Preview />
-            <Link.Menu>
-              <Link.MenuAction
-                title="Action"
-                icon="cube"
-                onPress={() => alert("Action pressed")}
-              />
-              <Link.MenuAction
-                title="Share"
-                icon="square.and.arrow.up"
-                onPress={() => alert("Share pressed")}
-              />
-              <Link.Menu title="More" icon="ellipsis">
-                <Link.MenuAction
-                  title="Delete"
-                  icon="trash"
-                  destructive
-                  onPress={() => alert("Delete pressed")}
-                />
-              </Link.Menu>
-            </Link.Menu>
-          </Link>
-        </ThemedOverlayCard>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedOverlayCard>
-          <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-          <ThemedText>
-            {`When you're ready, run `}
-            <ThemedText type="defaultSemiBold">
-              npm run reset-project
-            </ThemedText>{" "}
-            to get a fresh <ThemedText type="defaultSemiBold">app</ThemedText>{" "}
-            directory. This will move the current{" "}
-            <ThemedText type="defaultSemiBold">app</ThemedText> to{" "}
-            <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-          </ThemedText>
-        </ThemedOverlayCard>
+      <ThemedView style={styles.container}>
+        <View style={styles.cardWrapper}>
+          <Card
+            appearance="outline"
+            status="basic"
+            style={[styles.card, { height: 300 }]}
+          >
+            <Text category="h6" appearance="hint">
+              Treino de hoje
+            </Text>
+            <Button appearance="filled">Completar</Button>
+          </Card>
+        </View>
+
+        {/* Progresso da semana */}
+        <Text category="c1" appearance="hint" style={{ marginTop: 20 }}>
+          Gráfico de cargas
+        </Text>
+        <Card style={styles.progressContainer} status="primary">
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: "70%" }]} />
+          </View>
+          <Text category="s1" style={styles.progressText}>
+            70% da meta atingida 💪
+          </Text>
+        </Card>
+
+        {/* Dicas rápidas */}
+        <Text category="h6" style={{ marginTop: 20 }}>
+          Dicas rápidas
+        </Text>
+        <FlatList
+          data={tips}
+          keyExtractor={(item) => item.id}
+          renderItem={renderTip}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingVertical: 10 }}
+        />
+
+        {/* Últimos treinos concluídos */}
+        <Text category="h6" style={{ marginTop: 20 }}>
+          Últimos treinos
+        </Text>
+        <Card style={{ marginTop: 10 }} status="basic">
+          <Text category="s1">Treino de Peito - Concluído ✅</Text>
+        </Card>
+        <Card style={{ marginTop: 10 }} status="basic">
+          <Text category="s1">Treino de Pernas - Concluído ✅</Text>
+        </Card>
       </ThemedView>
     </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginHorizontal: 20,
-    gap: 10,
+  container: {
+    flex: 1,
+    paddingBottom: 30,
   },
-  stepContainer: {
-    gap: 8,
+  cardWrapper: {
+    borderRadius: 22,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 5,
+    marginBottom: 16,
   },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: "absolute",
+  card: {
+    overflow: "hidden",
+    borderRadius: 20,
+  },
+
+  tipCard: {
+    borderRadius: 10,
+    marginRight: 15,
+    width: 200,
+  },
+  progressContainer: {
+    borderRadius: 10,
+    height: 300,
+  },
+  progressBar: {
+    height: 12,
+    backgroundColor: "#B2EBF2",
+    borderRadius: 6,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: 12,
+    backgroundColor: "#00ACC1",
+    borderRadius: 6,
+  },
+  progressText: {
+    marginTop: 10,
+    fontWeight: "600",
+    color: "#007C91",
   },
 });

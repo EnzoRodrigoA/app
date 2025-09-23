@@ -41,6 +41,8 @@ export default function OnboardingStep() {
   const handleNext = async () => {
     if (currentStep + 1 < questions.length) {
       setCurrentStep(currentStep + 1);
+      await AsyncStorage.setItem("hasCompletedOnboarding", "false");
+      setHasCompletedOnboarding(false);
     } else {
       setIsSubmitting(true);
       try {
@@ -83,7 +85,6 @@ export default function OnboardingStep() {
                   onChange={updateAnswer}
                 />
               </Animated.View>
-
               <Button
                 onPress={handleNext}
                 style={styles.button}
@@ -97,6 +98,24 @@ export default function OnboardingStep() {
                 }
               >
                 {currentStep + 1 < questions.length ? "Próxima" : "Finalizar"}
+              </Button>
+              <Button
+                style={[styles.button, { opacity: currentStep > 0 ? 1 : 0 }]}
+                appearance="outline"
+                onPress={async () => {
+                  if (currentStep > 0) {
+                    setCurrentStep(currentStep - 1);
+                  } else {
+                    await AsyncStorage.setItem(
+                      "hasCompletedOnboarding",
+                      "false"
+                    );
+                    setHasCompletedOnboarding(false);
+                    router.replace("/(tabs)");
+                  }
+                }}
+              >
+                Voltar
               </Button>
             </>
           ) : (

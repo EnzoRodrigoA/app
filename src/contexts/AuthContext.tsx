@@ -10,17 +10,23 @@ import {
 
 type AuthContextType = {
   isLoggedIn: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<AuthResponse>;
   register: (
     username: string,
     email: string,
     password: string
-  ) => Promise<void>;
+  ) => Promise<AuthResponse>;
   token: string | null;
   logout: () => void;
   loading: boolean;
   hasCompletedOnboarding: boolean;
   setHasCompletedOnboarding: (value: boolean) => void;
+};
+
+type AuthResponse = {
+  success: boolean;
+  message?: string;
+  data?: any;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,35 +58,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loadState();
   }, []);
 
-  async function login(email: string, password: string) {
+  async function login(email: string, password: string): Promise<AuthResponse> {
     try {
       const response = await api.post("/sessions", { email, password });
       const userToken = response.data?.token;
       setToken(userToken);
       setIsLoggedIn(true);
-
       await AsyncStorage.setItem("authToken", userToken);
+      return {
+        success: true,
+        data: response.data,
+        message: "Login realizado com sucesso!",
+      };
     } catch (error: any) {
       console.error("Erro no login:", error.response?.data.message);
+      return { success: false, message: "Falha ao fazer login" };
     }
   }
 
-  async function register(username: string, email: string, password: string) {
+  async function register(
+    username: string,
+    email: string,
+    password: string
+  ): Promise<AuthResponse> {
     try {
       const response = await api.post("/users", {
         username,
         email,
         password,
       });
-      const userToken = response.data.token;
-      setToken(userToken);
-      setIsLoggedIn(true);
-      await AsyncStorage.setItem("authToken", userToken);
+      return {
+        success: true,
+        data: response.data,
+        message: "Cadastro realizado com sucesso!",
+      };
     } catch (error: any) {
       console.error(
         "Erro ao cadastrar:",
-        error.response?.data || error.message
+        error.response?.data || error.message || "Erro desconhecido"
       );
+      return { success: false, message: "Falha ao realizar cadastro:" };
     }
   }
 
