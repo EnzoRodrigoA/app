@@ -1,6 +1,6 @@
 import { type ViewProps } from "react-native";
 
-import { SafeAreaView } from "react-native-safe-area-context";
+import { View } from "react-native";
 import { useThemeColor } from "../hooks/use-theme-color";
 
 export type ThemedViewProps = ViewProps & {
@@ -19,5 +19,5 @@ export function ThemedView({
     "background"
   );
 
-  return <SafeAreaView style={[{ backgroundColor }, style]} {...otherProps} />;
+  return <View style={[{ backgroundColor }, style]} {...otherProps} />;
 }
