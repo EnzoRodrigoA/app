@@ -106,7 +106,7 @@ export const QuestionField: React.FC<QuestionFieldProps> = ({
               const selected = index as IndexPath;
               setSelectedIndex(selected);
               const backendValue = question.options?.[selected.row];
-              onChange(question.id, question.options?.[selected.row]);
+              onChange(question.id, backendValue);
             }}
             placeholder="Selecione uma opção"
           >
