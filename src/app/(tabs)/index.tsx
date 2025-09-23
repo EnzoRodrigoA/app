@@ -1,6 +1,6 @@
 import ParallaxScrollView from "@/components/parallax-scroll-view";
 import { ThemedView } from "@/components/themed-view";
-import { Button, Card, Text, useTheme } from "@ui-kitten/components";
+import { Button, Card, Text } from "@ui-kitten/components";
 import { FlatList, StyleSheet, View } from "react-native";
 import "react-native-gesture-handler";
 import "react-native-reanimated";
@@ -11,18 +11,7 @@ const tips = [
   { id: "3", title: "Durma bem", emoji: "😴" },
 ];
 
-const today = new Date();
-const options: Intl.DateTimeFormatOptions = {
-  weekday: "long",
-  day: "numeric",
-  month: "long",
-};
-let todayString = today.toLocaleDateString("pt-BR", options);
-todayString = todayString.charAt(0).toUpperCase() + todayString.slice(1);
-
 export default function HomeScreen() {
-  const theme = useTheme();
-
   const renderTip = ({ item }: any) => (
     <Card style={styles.tipCard} status="info">
       <Text category="s1">
