@@ -166,6 +166,8 @@ const styles = StyleSheet.create({
   label: {
     marginBottom: 8,
     paddingVertical: 20,
+    fontFamily: "TekoRegular",
+    fontSize: 36,
   },
   progress: {
     marginTop: 12,

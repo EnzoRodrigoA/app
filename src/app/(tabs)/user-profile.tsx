@@ -1,3 +1,5 @@
+import { AnimatedIcon } from "@/components/animated-icon";
+import ParallaxScrollView from "@/components/parallax-scroll-view";
 import { Skeleton } from "@/components/Skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/services/api";
@@ -5,7 +7,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { Card, Divider, Layout, Text, useTheme } from "@ui-kitten/components";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import Animated, { FadeInRight } from "react-native-reanimated";
 
 export default function HomeScreen() {
   const { logout, isLoggedIn } = useAuth();
@@ -29,14 +32,18 @@ export default function HomeScreen() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const [userResponse, settingsResponse] = await Promise.all([
           api.get("/user"),
           api.get("/user-settings"),
-          setLoading(true),
         ]);
         setUser(userResponse.data);
-        setSettings(settingsResponse.data);
+        if (!settingsResponse.data) {
+          router.replace("/onboarding");
+        } else {
+          setSettings(settingsResponse.data);
+        }
       } catch (err) {
         console.error("Erro ao buscar dados:", err);
       } finally {
@@ -44,62 +51,32 @@ export default function HomeScreen() {
       }
     };
     fetchData();
-  }, [isLoggedIn]);
+  }, [isLoggedIn, router]);
 
-  return (
-    <Layout
-      style={[
-        styles.container,
-        { backgroundColor: theme["background-basic-color-1"] },
-      ]}
+  return loading && !settings ? (
+    <Layout style={styles.skeletonContainer}>
+      <Skeleton
+        style={{
+          width: "80%",
+          height: 80,
+          marginBottom: 16,
+        }}
+      />
+      <Skeleton style={{ width: "100%", height: 200, marginBottom: 12 }} />
+      <Skeleton style={{ width: "100%", height: 60 }} />
+    </Layout>
+  ) : (
+    <ParallaxScrollView
+      title={
+        !loading && user ? (
+          <>
+            Olá {user?.username}! <AnimatedIcon emoji="👋" />
+          </>
+        ) : undefined
+      }
+      subtitle={!loading && user ? user?.email : undefined}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer}>
-        {/* Top Bar */}
-        <View style={styles.topBar}>
-          <Pressable onPress={handleLogout}>
-            <Ionicons
-              name="log-out-outline"
-              size={28}
-              color={theme["color-danger-500"]}
-            />
-          </Pressable>
-          <Pressable onPress={() => router.replace("/(tabs)")}>
-            <Ionicons
-              name="chevron-forward"
-              size={28}
-              color={theme["text-basic-color"]}
-            />
-          </Pressable>
-        </View>
-
-        {loading && (
-          <Layout style={styles.skeletonContainer}>
-            <Skeleton
-              style={{
-                width: "60%",
-                height: 24,
-                marginBottom: 16,
-              }}
-            />
-            <Skeleton style={{ width: "100%", height: 48, marginBottom: 12 }} />
-            <Skeleton style={{ width: "100%", height: 48 }} />
-          </Layout>
-        )}
-
-        {user && (
-          <View style={styles.greetingContainer}>
-            <Text
-              category="h4"
-              style={{ color: theme["text-basic-color"], fontWeight: "bold" }}
-            >
-              Olá, {user.username} 👋
-            </Text>
-            <Text category="s2" style={{ color: theme["text-hint-color"] }}>
-              {user.email}
-            </Text>
-          </View>
-        )}
-
+      <Animated.View entering={FadeInRight.duration(600).delay(300)}>
         {settings && (
           <Card style={styles.infoCard}>
             <Text category="s1" style={styles.cardTitle}>
@@ -132,25 +109,37 @@ export default function HomeScreen() {
             </View>
           </Card>
         )}
-      </ScrollView>
-    </Layout>
+      </Animated.View>
+      <Animated.View entering={FadeInRight.duration(600).delay(600)}>
+        <View style={styles.topBar}>
+          <Text status="danger">Sair</Text>
+          <Pressable onPress={handleLogout}>
+            <Ionicons
+              name="log-out-outline"
+              size={28}
+              color={theme["color-danger-500"]}
+            />
+          </Pressable>
+        </View>
+      </Animated.View>
+    </ParallaxScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   skeletonContainer: {
     flex: 1,
-    justifyContent: "center",
+    justifyContent: "flex-start",
+    paddingTop: 70,
     paddingHorizontal: 12,
   },
   container: { flex: 1 },
   scrollContainer: { padding: 20, gap: 20 },
   topBar: {
+    gap: 10,
     flexDirection: "row",
-    justifyContent: "space-between",
+    justifyContent: "center",
     alignItems: "center",
-    marginTop: 40,
-    marginBottom: 20,
   },
   greetingContainer: {
     marginBottom: 20,

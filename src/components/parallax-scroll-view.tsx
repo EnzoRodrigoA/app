@@ -2,27 +2,29 @@ import { Text, useTheme } from "@ui-kitten/components";
 import type { PropsWithChildren } from "react";
 import { StyleSheet } from "react-native";
 import Animated, {
+  FadeIn,
   interpolate,
   useAnimatedRef,
   useAnimatedStyle,
   useScrollOffset,
 } from "react-native-reanimated";
 
+import React from "react";
 import { ThemedView } from "../components/themed-view";
-import { useColorScheme } from "../hooks/use-color-scheme";
 
 const HEADER_HEIGHT = 100;
 
 type Props = PropsWithChildren<{
-  headerBackgroundColor: { dark: string; light: string };
+  title?: React.ReactNode;
+  subtitle?: string;
 }>;
 
 export default function ParallaxScrollView({
   children,
-  headerBackgroundColor,
+  title,
+  subtitle,
 }: Props) {
   const theme = useTheme();
-  const colorScheme = useColorScheme() ?? "light";
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const scrollOffset = useScrollOffset(scrollRef);
 
@@ -46,35 +48,37 @@ export default function ParallaxScrollView({
       ],
     };
   });
-  const today = new Date();
-  const options: Intl.DateTimeFormatOptions = {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  };
-  let todayString = today.toLocaleDateString("pt-BR", options);
-  todayString = todayString.charAt(0).toUpperCase() + todayString.slice(1);
 
   return (
     <Animated.ScrollView
       ref={scrollRef}
       style={{ backgroundColor: theme["background-basic-color-1"], flex: 1 }}
       scrollEventThrottle={16}
+      entering={FadeIn.duration(600)}
     >
       <Animated.View
         style={[
           styles.header,
-          { backgroundColor: headerBackgroundColor[colorScheme] },
+          { backgroundColor: theme["background-basic-color-1"] },
           headerAnimatedStyle,
         ]}
       >
-        <Text category="h4" style={{ marginBottom: 10 }}>
-          Hoje
+        <Text category="h1" style={styles.title}>
+          {title}
         </Text>
-        <Text>{todayString}</Text>
+        <Text category="p1" style={styles.text}>
+          {subtitle}
+        </Text>
       </Animated.View>
 
-      <ThemedView style={styles.content}>{children}</ThemedView>
+      <ThemedView
+        style={[
+          styles.content,
+          { backgroundColor: theme["background-basic-color-1"] },
+        ]}
+      >
+        {children}
+      </ThemedView>
     </Animated.ScrollView>
   );
 }
@@ -84,26 +88,19 @@ const styles = StyleSheet.create({
     height: HEADER_HEIGHT,
     overflow: "hidden",
     justifyContent: "flex-end",
-    marginTop: 40,
+    marginTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
+  },
+  title: {
+    fontFamily: "TekoMedium",
+  },
+  text: {
+    fontFamily: "RobotoLight",
   },
   content: {
     flex: 1,
     paddingHorizontal: 10,
     gap: 16,
-  },
-  greetingContainer: {
-    alignItems: "center",
-    marginTop: 10,
-  },
-  greeting: {
-    fontWeight: "700",
-    textAlign: "center",
-  },
-  avatarButton: {
-    position: "absolute",
-    bottom: 0,
-    right: 16,
   },
 });

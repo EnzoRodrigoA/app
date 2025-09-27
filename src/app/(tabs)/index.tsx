@@ -1,6 +1,7 @@
+import Button from "@/components/Button";
 import ParallaxScrollView from "@/components/parallax-scroll-view";
-import { ThemedView } from "@/components/themed-view";
-import { Button, Card, Text } from "@ui-kitten/components";
+import { Card, Layout, Text } from "@ui-kitten/components";
+import { useRouter } from "expo-router";
 import { FlatList, StyleSheet, View } from "react-native";
 import "react-native-gesture-handler";
 import "react-native-reanimated";
@@ -12,6 +13,8 @@ const tips = [
 ];
 
 export default function HomeScreen() {
+  const router = useRouter();
+
   const renderTip = ({ item }: any) => (
     <Card style={styles.tipCard} status="info">
       <Text category="s1">
@@ -19,26 +22,36 @@ export default function HomeScreen() {
       </Text>
     </Card>
   );
+  const today = new Date();
+  const options: Intl.DateTimeFormatOptions = {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  };
+  let todayString = today.toLocaleDateString("pt-BR", options);
+  todayString = todayString.charAt(0).toUpperCase() + todayString.slice(1);
 
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: "transparent", dark: "transparent" }}
-    >
-      <ThemedView style={styles.container}>
+    <ParallaxScrollView title="Hoje" subtitle={todayString}>
+      <Layout style={styles.container}>
         <View style={styles.cardWrapper}>
           <Card
             appearance="outline"
             status="basic"
-            style={[styles.card, { height: 300 }]}
+            style={[styles.card, { height: 300, marginBottom: 20 }]}
           >
             <Text category="h6" appearance="hint">
               Treino de hoje
             </Text>
-            <Button appearance="filled">Completar</Button>
+            <Button text="Completar"></Button>
           </Card>
+          <Button
+            onPress={() => router.replace("/workout")}
+            text="Seus treinos"
+            type="primary"
+          ></Button>
         </View>
 
-        {/* Progresso da semana */}
         <Text category="c1" appearance="hint" style={{ marginTop: 20 }}>
           Gráfico de cargas
         </Text>
@@ -74,7 +87,7 @@ export default function HomeScreen() {
         <Card style={{ marginTop: 10 }} status="basic">
           <Text category="s1">Treino de Pernas - Concluído ✅</Text>
         </Card>
-      </ThemedView>
+      </Layout>
     </ParallaxScrollView>
   );
 }
@@ -83,10 +96,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingBottom: 30,
+    backgroundColor: "transparent",
   },
   cardWrapper: {
-    borderRadius: 22,
-    backgroundColor: "#fff",
+    borderRadius: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.1,
@@ -99,6 +112,17 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
 
+  button: {
+    borderRadius: 20,
+    backgroundColor: "#003cff",
+  },
+  buttonText: {
+    textAlign: "center",
+    justifyContent: "center",
+    padding: 10,
+    color: "white",
+    fontFamily: "RobotoLight",
+  },
   tipCard: {
     borderRadius: 10,
     marginRight: 15,

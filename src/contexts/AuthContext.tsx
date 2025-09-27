@@ -20,7 +20,7 @@ type AuthContextType = {
   logout: () => void;
   loading: boolean;
   hasCompletedOnboarding: boolean;
-  setHasCompletedOnboarding: (value: boolean) => void;
+  setHasCompletedOnboarding: (value: boolean) => Promise<void>;
 };
 
 type AuthResponse = {
@@ -36,6 +36,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState(false);
+
+  async function updateOnboarding(value: boolean) {
+    setHasCompletedOnboarding(value);
+    await AsyncStorage.setItem(
+      "hasCompletedOnboarding",
+      value ? "true" : "false"
+    );
+  }
 
   useEffect(() => {
     async function loadState() {
@@ -121,7 +129,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         token,
         loading,
         hasCompletedOnboarding,
-        setHasCompletedOnboarding,
+        setHasCompletedOnboarding: updateOnboarding,
       }}
     >
       {children}

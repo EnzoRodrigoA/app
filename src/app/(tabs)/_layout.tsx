@@ -7,7 +7,7 @@ import { Tabs } from "expo-router";
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const theme = useTheme();
-  const backgroundColor = colorScheme === "dark" ? "#000000dd" : "#ffffffcb";
+  const backgroundColor = colorScheme === "dark" ? "#010101" : "#fff";
 
   return (
     <Tabs
@@ -15,22 +15,13 @@ export default function TabLayout() {
         tabBarActiveTintColor: theme["color-primary-500"],
         tabBarInactiveTintColor: theme["text-hint-color"],
         headerShown: false,
-        tabBarShowLabel: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
-          position: "absolute",
-          bottom: 16,
-          height: 60,
-          borderTopWidth: 0, // sem linha padrão
-          marginHorizontal: 20,
-          paddingTop: 10,
-          backgroundColor: backgroundColor, // cor do tema
-          shadowColor: "#000",
-          shadowOpacity: 0.1,
-          shadowOffset: { width: 0, height: 4 },
-          shadowRadius: 10,
-          elevation: 5, // sombra no Android
-          borderRadius: 100, // borda arredondada
+          height: 80,
+          borderTopWidth: 0,
+          paddingTop: 0,
+
+          backgroundColor: backgroundColor,
         },
       }}
     >
@@ -44,9 +35,9 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="workout"
+        name="dashboard"
         options={{
-          title: "Treinos",
+          title: "Painel",
           tabBarIcon: ({ color }) => (
             <Ionicons size={28} name="barbell-outline" color={color} />
           ),
