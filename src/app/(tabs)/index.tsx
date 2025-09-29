@@ -1,6 +1,6 @@
 import Button from "@/components/Button";
 import ParallaxScrollView from "@/components/parallax-scroll-view";
-import { Card, Layout, Text } from "@ui-kitten/components";
+import { Card, Layout, Text, useTheme } from "@ui-kitten/components";
 import { useRouter } from "expo-router";
 import { FlatList, StyleSheet, View } from "react-native";
 import "react-native-gesture-handler";
@@ -31,14 +31,23 @@ export default function HomeScreen() {
   let todayString = today.toLocaleDateString("pt-BR", options);
   todayString = todayString.charAt(0).toUpperCase() + todayString.slice(1);
 
+  const theme = useTheme();
+
   return (
     <ParallaxScrollView title="Hoje" subtitle={todayString}>
       <Layout style={styles.container}>
         <View style={styles.cardWrapper}>
           <Card
             appearance="outline"
-            status="basic"
-            style={[styles.card, { height: 300, marginBottom: 20 }]}
+            style={[
+              styles.card,
+              {
+                height: 300,
+                marginBottom: 20,
+                backgroundColor: theme["background-basic-color-2"],
+                borderWidth: 0,
+              },
+            ]}
           >
             <Text category="h6" appearance="hint">
               Treino de hoje
@@ -51,18 +60,6 @@ export default function HomeScreen() {
             type="primary"
           ></Button>
         </View>
-
-        <Text category="c1" appearance="hint" style={{ marginTop: 20 }}>
-          Gráfico de cargas
-        </Text>
-        <Card style={styles.progressContainer} status="primary">
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: "70%" }]} />
-          </View>
-          <Text category="s1" style={styles.progressText}>
-            70% da meta atingida 💪
-          </Text>
-        </Card>
 
         {/* Dicas rápidas */}
         <Text category="h6" style={{ marginTop: 20 }}>

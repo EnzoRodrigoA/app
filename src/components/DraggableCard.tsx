@@ -1,5 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Card, Text } from "@ui-kitten/components";
+import { Card, Text, useTheme } from "@ui-kitten/components";
 import { ReactNode, useEffect, useState } from "react";
 import {
   Pressable,
@@ -55,9 +55,10 @@ export function DraggableCard({
       { scale: withSpring(isActive ? 1.05 : 1) },
       { translateX: translateX.value },
     ],
-    shadowOpacity: isActive ? 0.25 : 0.1,
-    shadowRadius: isActive ? 14 : 8,
-    elevation: isActive ? 12 : 5,
+    shadowOffset: { width: 0, height: isActive ? 6 : 2 },
+    shadowOpacity: isActive ? 0.25 : 0.12,
+    shadowRadius: isActive ? 12 : 6,
+    elevation: isActive ? 10 : 4,
   }));
 
   useEffect(() => {
@@ -75,23 +76,38 @@ export function DraggableCard({
     setEditingTitle(localTitle);
     setIsEditingTitle(false);
   };
+  const theme = useTheme();
 
   return (
-    <Animated.View style={[styles.cardWrapper, animatedStyle]}>
+    <Animated.View style={[styles.cardWrapper, animatedStyle, ,]}>
       <Card
         style={[
           styles.card,
           isRest
             ? scheme === "dark"
-              ? { backgroundColor: "rgba(165, 80, 255, 0.15)" }
-              : { backgroundColor: "rgba(111, 0, 255, 0.05)" }
+              ? { backgroundColor: "transparent" }
+              : { backgroundColor: "transparent" }
             : scheme === "dark"
-            ? { backgroundColor: "rgba(255, 185, 80, 0.1)" }
-            : { backgroundColor: "rgba(255, 162, 0, 0.05)" },
+            ? { backgroundColor: theme["background-basic-color-2"] }
+            : { backgroundColor: theme["background-basic-color-2"] },
+          { marginTop: 10, height: 80, justifyContent: "center" },
         ]}
         onPress={onPressDetails}
         disabled={!!isRest}
       >
+        {isRest && (
+          <View
+            style={{
+              position: "absolute",
+              top: "100%",
+              left: 60,
+              height: 2,
+              width: "78%",
+              backgroundColor: scheme === "dark" ? "#ffffff" : "#000",
+              zIndex: 0,
+            }}
+          />
+        )}
         <View style={styles.cardHeader}>
           <View style={styles.left}>
             {isEditingTitle ? null : onDelete && editMode && !isEditingTitle ? (
@@ -101,14 +117,30 @@ export function DraggableCard({
             ) : !isRest && !isEditingTitle ? (
               <Ionicons name="barbell-outline" size={26} color={"#ff8800"} />
             ) : (
-              <Ionicons name="moon-outline" size={26} color={"#4400ff"} />
+              <Ionicons
+                name="bed-outline"
+                size={28}
+                color={scheme === "dark" ? "#ffffff" : "#000"}
+              />
             )}
           </View>
 
           <View style={[styles.center, { alignItems: "center" }]}>
             {isRest ? (
               <View style={{ flexDirection: "row", gap: 20 }}>
-                <Text category="h5" style={styles.title}>
+                <Text
+                  category="h5"
+                  style={[
+                    styles.title,
+                    {
+                      textAlign: "center",
+                      zIndex: 1,
+                      backgroundColor: theme["background-basic-color-1"],
+                      borderRadius: 20,
+                      paddingHorizontal: 12,
+                    },
+                  ]}
+                >
                   Dia de descanso
                 </Text>
               </View>
@@ -185,7 +217,7 @@ export function DraggableCard({
           </View>
 
           <View style={styles.right}>
-            {editMode && !isEditingTitle && (
+            {editMode && !isEditingTitle ? (
               <Pressable onLongPress={drag} delayLongPress={50}>
                 <Ionicons
                   name="reorder-three-outline"
@@ -193,6 +225,14 @@ export function DraggableCard({
                   color={"#0040ff"}
                 />
               </Pressable>
+            ) : (
+              isRest && (
+                <Ionicons
+                  name="moon-outline"
+                  size={26}
+                  color={scheme === "dark" ? "#ffffff" : "#000"}
+                />
+              )
             )}
           </View>
         </View>
@@ -205,13 +245,9 @@ export function DraggableCard({
 
 const styles = StyleSheet.create({
   cardWrapper: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
     elevation: 5,
-    marginTop: 16,
     marginHorizontal: 16,
+    marginTop: 10,
   },
   card: {
     borderRadius: 16,

@@ -7,7 +7,10 @@ import { Tabs } from "expo-router";
 export default function TabLayout() {
   const colorScheme = useColorScheme();
   const theme = useTheme();
-  const backgroundColor = colorScheme === "dark" ? "#010101" : "#fff";
+  const backgroundColor =
+    colorScheme === "dark"
+      ? theme["background-basic-color-1"]
+      : theme["background-basic-color-1"];
 
   return (
     <Tabs

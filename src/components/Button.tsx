@@ -1,3 +1,4 @@
+import { useTheme } from "@ui-kitten/components";
 import {
   GestureResponderEvent,
   Pressable,
@@ -30,6 +31,8 @@ export default function Button({
 }: ButtonProps) {
   const pressed = useSharedValue(0);
 
+  const theme = useTheme();
+
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [
       { scale: withTiming(pressed.value ? 0.96 : 1, { duration: 100 }) },
@@ -51,7 +54,9 @@ export default function Button({
       <Animated.View
         style={[
           styles.base,
-          type === "primary" ? styles.primary : styles.secondary,
+          type === "primary"
+            ? { backgroundColor: theme["color-primary-500"] }
+            : { backgroundColor: theme["color-secondary-500"] },
           animatedStyle,
           style,
         ]}
@@ -75,12 +80,7 @@ const styles = StyleSheet.create({
     elevation: 4,
     margin: 5,
   },
-  primary: {
-    backgroundColor: "#003cff",
-  },
-  secondary: {
-    backgroundColor: "#60a5fa",
-  },
+
   text: {
     color: "#fff",
     fontWeight: "600",

@@ -1,10 +1,16 @@
-// /workouts/[id]/exercises.tsx
 import Button from "@/components/Button";
 import { DraggableCard } from "@/components/DraggableCard";
 import AppModal from "@/components/Modal";
 import api from "@/services/api";
 import { Ionicons } from "@expo/vector-icons";
-import { Input, Text, useTheme } from "@ui-kitten/components";
+import {
+  IndexPath,
+  Input,
+  Select,
+  SelectItem,
+  Text,
+  useTheme,
+} from "@ui-kitten/components";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -14,6 +20,7 @@ import {
   Platform,
   Pressable,
   StyleSheet,
+  useColorScheme,
   View,
 } from "react-native";
 import DraggableFlatList, {
@@ -23,58 +30,59 @@ import Animated, { FadeInDown, FadeOut } from "react-native-reanimated";
 
 interface Exercise {
   id: string;
-  name: string;
-  reps: number;
-  sets: number;
+  exercise_name: string;
+  target_muscle: string;
 }
 
-interface AvailableExercise {
+interface WorkoutExercise {
   id: string;
+  workout_id: string;
+  exercise_id: string;
+  exercise_sequence: string;
   name: string;
 }
 
-const toExercise = (e: any): Exercise => ({
-  id: e.id,
-  name: e.name,
-  reps: e.reps,
-  sets: e.sets,
-});
-
-const toAvailableExercise = (e: any): AvailableExercise => ({
-  id: e.id,
-  name: String(e.name),
-});
-
-const getExercises = async (workoutId: string): Promise<Exercise[]> => {
-  const response = await api.get(`/workouts-exercises/${workoutId}`);
-  return response.data.map(toExercise);
+const getExercises = async (workoutId: string): Promise<WorkoutExercise[]> => {
+  const response = await api.get(`/workout-exercises/${workoutId}`);
+  return response.data;
 };
 
-const getAvailableExercises = async (): Promise<AvailableExercise[]> => {
-  const response = await api.get("/exercises");
-  return response.data.map(toAvailableExercise);
+const getAvailableExercises = async (muscle?: string, name?: string) => {
+  const response = await api.get("/exercises", {
+    params: { muscle, name },
+  });
+  return response.data;
 };
 
 const addExercise = async (workoutId: string, exerciseId: string) => {
-  const response = await api.post(`/workouts-exercises/${workoutId}`, {
+  console.log("POST para:", api.defaults.baseURL + "/workout-exercises", {
     exerciseId,
+    workoutId,
   });
-  return toExercise(response.data);
+  const response = await api.post("/workout-exercises", {
+    exerciseId: exerciseId,
+    workoutId: workoutId,
+  });
+  return response.data;
 };
 
 export default function ExercisesScreen() {
   const { id: workoutId } = useLocalSearchParams<{ id: string }>();
   const theme = useTheme();
 
-  const [exercises, setExercises] = useState<Exercise[]>([]);
+  const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
 
-  const [availableExercises, setAvailableExercises] = useState<
-    AvailableExercise[]
-  >([]);
+  console.log(setEditMode);
+
+  const [availableExercises, setAvailableExercises] = useState<Exercise[]>([]);
   const [searchText, setSearchText] = useState("");
+  const [selectedIndex, setSelectedIndex] = useState<IndexPath | undefined>();
+  const [selectedMuscle, setSelectedMuscle] = useState<string | null>(null);
+
+  const muscles = ["Peito", "Costas", "Pernas", "Ombros", "Bíceps", "Tríceps"];
 
   useEffect(() => {
     if (!workoutId) return;
@@ -83,8 +91,6 @@ export default function ExercisesScreen() {
         setLoading(true);
         const data = await getExercises(workoutId);
         setExercises(data);
-        const available = await getAvailableExercises();
-        setAvailableExercises(available);
       } catch (err) {
         console.error("Erro ao buscar exercícios:", err);
       } finally {
@@ -94,16 +100,29 @@ export default function ExercisesScreen() {
     fetchExercises();
   }, [workoutId]);
 
-  const filteredExercises = availableExercises.filter((e) =>
-    e.name.toLowerCase().includes(searchText.toLowerCase())
-  );
+  const fetchAvailable = async (muscle?: string, name?: string) => {
+    try {
+      setLoading(true);
+
+      const available = await getAvailableExercises(muscle, name);
+      console.log("Exercises disponíveis:", available);
+      setAvailableExercises(available);
+    } catch (err) {
+      console.error("Erro ao buscar exercícios disponíveis:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleAddExercise = async (exerciseId: string) => {
     if (!workoutId) return;
     try {
       setLoading(true);
-      const newExercise = await addExercise(workoutId, exerciseId);
-      setExercises((prev) => [...prev, newExercise]);
+      await addExercise(workoutId, exerciseId);
+
+      const updatedExercises = await getExercises(workoutId);
+      setExercises(updatedExercises);
+
       setShowAddModal(false);
       setSearchText("");
     } catch (err) {
@@ -112,6 +131,12 @@ export default function ExercisesScreen() {
       setLoading(false);
     }
   };
+
+  const filteredExercises = availableExercises.filter((e) =>
+    e.exercise_name.toLowerCase().includes(searchText.toLowerCase())
+  );
+
+  const colorScheme = useColorScheme();
 
   return (
     <KeyboardAvoidingView
@@ -126,15 +151,16 @@ export default function ExercisesScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
+          <Text category="h1" style={styles.title}>
+            Exercícios
+          </Text>
           <Pressable onPress={() => router.back()}>
             <Ionicons
-              name="chevron-back"
+              name="chevron-forward"
               size={28}
-              color={theme["text-basic-color"]}
+              color={colorScheme === "dark" ? "#fff" : "#000"}
             />
           </Pressable>
-          <Text category="h1">Exercícios</Text>
-          <View style={{ width: 28 }} />
         </View>
 
         <View style={styles.listContainer}>
@@ -153,7 +179,7 @@ export default function ExercisesScreen() {
                 item,
                 drag,
                 isActive,
-              }: RenderItemParams<Exercise>) => (
+              }: RenderItemParams<WorkoutExercise>) => (
                 <Animated.View
                   entering={FadeInDown.delay(50)}
                   exiting={FadeOut}
@@ -165,7 +191,7 @@ export default function ExercisesScreen() {
                     editMode={editMode}
                   >
                     <Text category="c2" style={{ marginTop: 6 }}>
-                      {item.sets} sets x {item.reps} reps
+                      Músculo alvo: {item.name}
                     </Text>
                   </DraggableCard>
                 </Animated.View>
@@ -178,13 +204,10 @@ export default function ExercisesScreen() {
         {!loading && (
           <View style={styles.floatButtonContainer}>
             <Pressable
-              onPress={() => setShowAddModal(true)}
-              style={[styles.floatButton, { backgroundColor: "#0037ff" }]}
-            >
-              <Ionicons name="add" size={28} color="white" />
-            </Pressable>
-            <Pressable
-              onPress={() => setEditMode(true)}
+              onPress={() => {
+                setShowAddModal(true);
+                fetchAvailable();
+              }}
               style={[styles.floatButton, { backgroundColor: "#0037ff" }]}
             >
               <Ionicons name="add" size={28} color="white" />
@@ -196,12 +219,35 @@ export default function ExercisesScreen() {
           <Text category="h5" style={{ marginBottom: 12 }}>
             Adicionar Exercício
           </Text>
+
+          <Select
+            placeholder="Selecione o grupo muscular"
+            selectedIndex={selectedIndex}
+            onSelect={(index) => {
+              const selected = index as IndexPath;
+              setSelectedIndex(selected);
+
+              const muscle = muscles[selected.row];
+              setSelectedMuscle(muscle);
+              fetchAvailable(muscle, searchText);
+            }}
+            style={{ marginBottom: 12 }}
+          >
+            {muscles.map((muscle) => (
+              <SelectItem key={muscle} title={muscle} />
+            ))}
+          </Select>
+
           <Input
             placeholder="Buscar exercício..."
             value={searchText}
-            onChangeText={setSearchText}
+            onChangeText={(text) => {
+              setSearchText(text);
+              fetchAvailable(selectedMuscle ?? undefined, text);
+            }}
             style={{ marginBottom: 12 }}
           />
+
           <FlatList
             data={filteredExercises}
             keyExtractor={(item) => item.id}
@@ -210,11 +256,15 @@ export default function ExercisesScreen() {
                 onPress={() => handleAddExercise(item.id)}
                 style={styles.exerciseItem}
               >
-                <Text>{item.name}</Text>
+                <Text category="s1">{item.exercise_name}</Text>
+                <Text appearance="hint" category="c2">
+                  {item.target_muscle}
+                </Text>
               </Pressable>
             )}
             style={{ maxHeight: 300 }}
           />
+
           <Button
             text="Cancelar"
             type="secondary"
@@ -230,11 +280,16 @@ export default function ExercisesScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, gap: 16 },
   header: {
+    height: 40,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
+    paddingHorizontal: 30,
     marginTop: 50,
+  },
+
+  title: {
+    fontFamily: "TekoRegular",
   },
   listContainer: { flex: 1 },
   floatButtonContainer: {
@@ -244,16 +299,16 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   floatButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 30,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
   },
   exerciseItem: {
-    paddingVertical: 10,
+    paddingVertical: 14,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
+    borderBottomColor: "#eee",
   },
 });
