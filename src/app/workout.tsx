@@ -312,7 +312,7 @@ export default function WorkoutScreen() {
                           router.push(`/workout-exercises/${item.id}`)
                         }
                         type="primary"
-                        text="Editar exercícios"
+                        content={<Text>Editar Exercícios</Text>}
                       />
                     </View>
                   </DraggableCard>
@@ -346,7 +346,7 @@ export default function WorkoutScreen() {
                 styles.floatButton,
                 {
                   backgroundColor: editMode
-                    ? theme["color-success-500"]
+                    ? theme["color-primary-600"]
                     : theme["color-primary-500"],
                 },
               ]}
@@ -372,7 +372,7 @@ export default function WorkoutScreen() {
             }}
             type="primary"
             style={styles.ModalButton}
-            text="Novo treino"
+            content={<Text>Novo Treino</Text>}
           ></Button>
           <Button
             onPress={async () => {
@@ -381,7 +381,7 @@ export default function WorkoutScreen() {
             }}
             type="secondary"
             style={styles.ModalButton}
-            text="Descanso"
+            content={<Text>Adicionar Descanso</Text>}
           ></Button>
         </AppModal>
 

@@ -189,13 +189,13 @@ export function DraggableCard({
                 />
                 <View style={styles.editButtons}>
                   <Button
-                    text="Cancelar"
+                    content={<Text>Cancelar</Text>}
                     onPress={handleCancelEdit}
                     type="secondary"
                     style={styles.button}
                   />
                   <Button
-                    text="Salvar"
+                    content={<Text>Salvar</Text>}
                     onPress={handleSaveTitle}
                     type="primary"
                     style={styles.button}

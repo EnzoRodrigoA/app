@@ -9,8 +9,9 @@
   "text-disabled-color": "#5C667A",
   "text-control-color": "#0A0E17",
 
-  "color-primary-500": "#1e90ff",
-  "color-secondary-500": "#00DFFF",
+  "color-primary-500": "#1e61ff",
+  "color-primary-600": "#75cdff",
+  "color-secondary-500": "#9b9b9b",
   "color-success-500": "#39FF14",
   "color-info-500": "#FF007F",
   "color-warning-500": "#FFC700",

@@ -267,7 +267,7 @@ export default function ExercisesScreen() {
               disabled={loading ? true : false}
               style={[
                 styles.floatButton,
-                { backgroundColor: theme["color-primary-500"] },
+                { backgroundColor: theme["color-primary-600"] },
               ]}
             >
               {loading ? (
@@ -330,7 +330,7 @@ export default function ExercisesScreen() {
           />
 
           <Button
-            text="Cancelar"
+            content={<Text>Cancelar</Text>}
             type="secondary"
             onPress={() => setShowAddModal(false)}
             style={{ marginTop: 12 }}
