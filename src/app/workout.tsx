@@ -32,11 +32,26 @@ interface Workout {
   isRest: boolean;
 }
 
+interface WorkoutExercise {
+  id: string;
+  workout_id: string;
+  exercise_id: string;
+  exercise_sequence: string;
+  name: string;
+}
+
 const toWorkout = (w: any): Workout => ({
   id: w.id,
   name: w.name,
   isRest: w.is_rest,
 });
+
+export const getExercises = async (
+  workoutId: string
+): Promise<WorkoutExercise[]> => {
+  const response = await api.get(`/workout-exercises/${workoutId}`);
+  return response.data;
+};
 
 export const getWorkouts = async (): Promise<Workout[]> => {
   const response = await api.get("/workouts");
@@ -68,10 +83,15 @@ export const addRestDay = async () => {
 
 export default function WorkoutScreen() {
   const theme = useTheme();
-  const [data, setData] = useState<Workout[]>([]);
+  const [workouts, setWorkouts] = useState<Workout[]>([]);
   const [editMode, setEditMode] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [allExercises, setAllExercises] = useState<
+    Record<string, WorkoutExercise[]>
+  >({});
+
   const fade = useSharedValue(0);
   const colorScheme = useColorScheme();
 
@@ -80,8 +100,24 @@ export default function WorkoutScreen() {
       try {
         setLoading(true);
         const WorkoutsFromAPI = await getWorkouts();
-        console.log(WorkoutsFromAPI);
-        setData(WorkoutsFromAPI);
+        setWorkouts(WorkoutsFromAPI);
+
+        const exercisesObj: Record<string, WorkoutExercise[]> = {};
+        await Promise.all(
+          WorkoutsFromAPI.map(async (w) => {
+            try {
+              const ex = await getExercises(w.id);
+              exercisesObj[w.id] = ex;
+            } catch (error: any) {
+              if (error.response?.status === 404) {
+                exercisesObj[w.id] = [];
+              } else {
+                console.error("Erro ao buscar exercícios", error);
+              }
+            }
+          })
+        );
+        setAllExercises(exercisesObj);
       } catch (error) {
         console.error("Erro ao buscar treinos:", error);
       } finally {
@@ -98,7 +134,7 @@ export default function WorkoutScreen() {
   const handleSaveOrder = async () => {
     try {
       setLoading(true);
-      await updateWorkoutOrder(data);
+      await updateWorkoutOrder(workouts);
     } catch (error) {
       console.error("Erro ao atualizar ordem:", error);
     } finally {
@@ -118,7 +154,7 @@ export default function WorkoutScreen() {
             try {
               setLoading(true);
               await updateWorkoutName(id, newName);
-              setData((prev) =>
+              setWorkouts((prev) =>
                 prev?.map((w) => (w.id === id ? { ...w, name: newName } : w))
               );
             } catch (error) {
@@ -145,7 +181,7 @@ export default function WorkoutScreen() {
             try {
               setLoading(true);
               await deleteWorkout(id);
-              setData((prev) => prev.filter((w) => w.id !== id));
+              setWorkouts((prev) => prev.filter((w) => w.id !== id));
             } catch (error) {
               console.error("Erro ao remover treino:", error);
             } finally {
@@ -161,7 +197,7 @@ export default function WorkoutScreen() {
     try {
       setLoading(true);
       const newWorkout = await addWorkout("Novo Treino", false);
-      setData((prev) => [...prev, newWorkout]);
+      setWorkouts((prev) => [...prev, newWorkout]);
     } catch (error) {
       console.error("Erro ao adicionar treino:", error);
     } finally {
@@ -174,7 +210,7 @@ export default function WorkoutScreen() {
       setLoading(true);
       const newRestDay = await addRestDay();
       console.log("Resposta do back: ", newRestDay);
-      setData((prev) => [...prev, newRestDay]);
+      setWorkouts((prev) => [...prev, newRestDay]);
     } catch (error) {
       console.error("Erro ao adicionar Descanso:", error);
     } finally {
@@ -207,7 +243,7 @@ export default function WorkoutScreen() {
         </View>
 
         <View style={styles.CardContainer}>
-          {!loading && data?.length === 0 ? (
+          {!loading && workouts?.length === 0 ? (
             <View style={styles.emptyState}>
               <Image
                 source={require("@/assets/images/WorkoutsBackgroun.png")}
@@ -220,8 +256,8 @@ export default function WorkoutScreen() {
             </View>
           ) : (
             <DraggableFlatList
-              data={data ?? []}
-              onDragEnd={({ data }) => setData(data)}
+              data={workouts ?? []}
+              onDragEnd={({ data }) => setWorkouts(data)}
               autoscrollThreshold={100}
               keyExtractor={(item) => item.id}
               renderItem={({ item, drag, isActive }) => (
@@ -235,17 +271,51 @@ export default function WorkoutScreen() {
                     drag={drag}
                     isActive={isActive}
                     editMode={editMode}
+                    isExpanded={expandedId === item.id}
                     onEditTitle={(newTitle) =>
                       handleEditTitle(item.id, newTitle)
                     }
                     onDelete={() => handleDelete(item.id)}
                     onPressDetails={() =>
-                      router.push({
-                        pathname: "/workout-exercises/[id]",
-                        params: { id: item.id },
-                      })
+                      setExpandedId((prev) =>
+                        prev === item.id ? null : item.id
+                      )
                     }
-                  />
+                  >
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={{
+                          marginTop: 10,
+                          fontSize: 22,
+                          fontFamily: "TekoRegular",
+                        }}
+                      >
+                        Exercícios
+                      </Text>
+                      <View>
+                        {!allExercises[item.id] ||
+                        allExercises[item.id]?.length === 0 ? (
+                          <Text>
+                            Você ainda não adicionou exercícios nesse treino!
+                          </Text>
+                        ) : (
+                          allExercises[item.id].map((ex) => (
+                            <Text style={{ marginBottom: 6 }} key={ex.id}>
+                              - {ex.name}
+                            </Text>
+                          ))
+                        )}
+                      </View>
+                      <Button
+                        style={styles.ModalButton}
+                        onPress={() =>
+                          router.push(`/workout-exercises/${item.id}`)
+                        }
+                        type="primary"
+                        text="Editar exercícios"
+                      />
+                    </View>
+                  </DraggableCard>
                 </Animated.View>
               )}
               contentContainerStyle={{ paddingBottom: 120 }}
@@ -274,7 +344,11 @@ export default function WorkoutScreen() {
               }}
               style={[
                 styles.floatButton,
-                { backgroundColor: editMode ? "#128400" : "#ff7701" },
+                {
+                  backgroundColor: editMode
+                    ? theme["color-success-500"]
+                    : theme["color-primary-500"],
+                },
               ]}
             >
               <Ionicons
@@ -320,7 +394,10 @@ export default function WorkoutScreen() {
             <Pressable
               onPress={() => setShowAddModal(true)}
               disabled={loading ? true : false}
-              style={[styles.floatButton, { backgroundColor: "#0037ff" }]}
+              style={[
+                styles.floatButton,
+                { backgroundColor: theme["color-primary-500"] },
+              ]}
             >
               {loading ? (
                 <ActivityIndicator color={"white"} />

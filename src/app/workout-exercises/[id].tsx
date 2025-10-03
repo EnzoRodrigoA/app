@@ -26,7 +26,12 @@ import {
 import DraggableFlatList, {
   RenderItemParams,
 } from "react-native-draggable-flatlist";
-import Animated, { FadeInDown, FadeOut } from "react-native-reanimated";
+import Animated, {
+  FadeInDown,
+  FadeInRight,
+  FadeOut,
+  FadeOutRight,
+} from "react-native-reanimated";
 
 interface Exercise {
   id: string;
@@ -40,6 +45,7 @@ interface WorkoutExercise {
   exercise_id: string;
   exercise_sequence: string;
   name: string;
+  muscle: string;
 }
 
 const getExercises = async (workoutId: string): Promise<WorkoutExercise[]> => {
@@ -66,6 +72,11 @@ const addExercise = async (workoutId: string, exerciseId: string) => {
   return response.data;
 };
 
+const updateExercisesOrder = async (exercises: WorkoutExercise[]) => {
+  const order = exercises.map((ex) => ex.id);
+  await api.patch("/workout-exercises/reorder", { order });
+};
+
 export default function ExercisesScreen() {
   const { id: workoutId } = useLocalSearchParams<{ id: string }>();
   const theme = useTheme();
@@ -74,8 +85,6 @@ export default function ExercisesScreen() {
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-
-  console.log(setEditMode);
 
   const [availableExercises, setAvailableExercises] = useState<Exercise[]>([]);
   const [searchText, setSearchText] = useState("");
@@ -136,6 +145,17 @@ export default function ExercisesScreen() {
     e.exercise_name.toLowerCase().includes(searchText.toLowerCase())
   );
 
+  const handleSaveOrder = async () => {
+    try {
+      setLoading(true);
+      await updateExercisesOrder(exercises);
+    } catch (error) {
+      console.error("Erro ao salvar ordem de Exercícios: ", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const colorScheme = useColorScheme();
 
   return (
@@ -149,7 +169,6 @@ export default function ExercisesScreen() {
           { backgroundColor: theme["background-basic-color-1"] },
         ]}
       >
-        {/* Header */}
         <View style={styles.header}>
           <Text category="h1" style={styles.title}>
             Exercícios
@@ -187,11 +206,12 @@ export default function ExercisesScreen() {
                   <DraggableCard
                     title={item.name}
                     drag={drag}
+                    isExercise={true}
                     isActive={isActive}
                     editMode={editMode}
                   >
                     <Text category="c2" style={{ marginTop: 6 }}>
-                      Músculo alvo: {item.name}
+                      Músculo alvo: {item.muscle}
                     </Text>
                   </DraggableCard>
                 </Animated.View>
@@ -201,18 +221,62 @@ export default function ExercisesScreen() {
           )}
         </View>
 
+        {/* // setShowAddModal(true);
+        // fetchAvailable(); */}
+
         {!loading && (
-          <View style={styles.floatButtonContainer}>
+          <Animated.View
+            entering={FadeInRight.duration(300).delay(300)}
+            exiting={FadeOutRight.duration(300).delay(300)}
+            style={styles.floatButtonContainer}
+          >
             <Pressable
-              onPress={() => {
-                setShowAddModal(true);
-                fetchAvailable();
+              onPress={async () => {
+                if (editMode) {
+                  try {
+                    await handleSaveOrder();
+                    setEditMode(false);
+                  } catch (error) {
+                    console.error(error);
+                  }
+                } else {
+                  setEditMode(true);
+                }
               }}
-              style={[styles.floatButton, { backgroundColor: "#0037ff" }]}
+              style={[
+                styles.floatButton,
+                { backgroundColor: theme["color-primary-500"] },
+              ]}
             >
-              <Ionicons name="add" size={28} color="white" />
+              <Ionicons
+                name={editMode ? "checkmark" : "pencil"}
+                size={28}
+                color="white"
+              />
             </Pressable>
-          </View>
+          </Animated.View>
+        )}
+        {editMode && !loading && (
+          <Animated.View
+            entering={FadeInRight.duration(300)}
+            exiting={FadeOutRight.duration(300)}
+            style={[styles.floatButtonContainer, { bottom: 100 }]}
+          >
+            <Pressable
+              onPress={() => setShowAddModal(true)}
+              disabled={loading ? true : false}
+              style={[
+                styles.floatButton,
+                { backgroundColor: theme["color-primary-500"] },
+              ]}
+            >
+              {loading ? (
+                <ActivityIndicator color={"white"} />
+              ) : (
+                <Ionicons name="add" size={28} color="white" />
+              )}
+            </Pressable>
+          </Animated.View>
         )}
 
         <AppModal visible={showAddModal} onClose={() => setShowAddModal(false)}>

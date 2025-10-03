@@ -6,8 +6,7 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { ApplicationProvider, IconRegistry } from "@ui-kitten/components";
-import { EvaIconsPack } from "@ui-kitten/eva-icons";
+import { ApplicationProvider } from "@ui-kitten/components";
 import * as Font from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
@@ -48,6 +47,10 @@ function LayoutWithAuth() {
             name="workout-exercises/[id]"
             options={{ headerShown: false, animation: "slide_from_left" }}
           />
+          <Stack.Screen
+            name="complete-workout/[id]"
+            options={{ headerShown: false, animation: "slide_from_right" }}
+          />
         </Stack.Protected>
       </Stack>
       <StatusBar style="auto" />
@@ -87,7 +90,6 @@ export default function RootLayout() {
   };
   return (
     <GestureHandlerRootView>
-      <IconRegistry icons={EvaIconsPack} />
       <ApplicationProvider
         {...eva}
         theme={{

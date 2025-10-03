@@ -1,6 +1,6 @@
 import { Text, useTheme } from "@ui-kitten/components";
 import type { PropsWithChildren } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import Animated, {
   FadeIn,
   interpolate,
@@ -10,7 +10,6 @@ import Animated, {
 } from "react-native-reanimated";
 
 import React from "react";
-import { ThemedView } from "../components/themed-view";
 
 const HEADER_HEIGHT = 100;
 
@@ -71,14 +70,14 @@ export default function ParallaxScrollView({
         </Text>
       </Animated.View>
 
-      <ThemedView
+      <View
         style={[
           styles.content,
           { backgroundColor: theme["background-basic-color-1"] },
         ]}
       >
         {children}
-      </ThemedView>
+      </View>
     </Animated.ScrollView>
   );
 }

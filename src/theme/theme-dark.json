@@ -1,18 +1,18 @@
 {
-  "background-basic-color-1": "#121212",
-  "background-basic-color-2": "#1A1A1A",
-  "background-basic-color-3": "#222222",
-  "background-basic-color-4": "#2A2A2A",
+  "background-basic-color-1": "#0A0E17",
+  "background-basic-color-2": "#141A29",
+  "background-basic-color-3": "#1F273D",
+  "background-basic-color-4": "#293450",
 
-  "text-basic-color": "#F5F5F5",
-  "text-hint-color": "#A0A0A0",
-  "text-disabled-color": "#6B7280",
-  "text-control-color": "#121212",
+  "text-basic-color": "#EAEAEA",
+  "text-hint-color": "#9DA8BE",
+  "text-disabled-color": "#5C667A",
+  "text-control-color": "#0A0E17",
 
-  "color-primary-500": "#3B5CA8",
-  "color-secondary-500": "#D1D1D1",
-  "color-success-500": "#2FE259",
-  "color-info-500": "#FFD700",
-  "color-warning-500": "#FF8C42",
-  "color-danger-500": "#E63946"
+  "color-primary-500": "#1e90ff",
+  "color-secondary-500": "#00DFFF",
+  "color-success-500": "#39FF14",
+  "color-info-500": "#FF007F",
+  "color-warning-500": "#FFC700",
+  "color-danger-500": "#FF3A5E"
 }

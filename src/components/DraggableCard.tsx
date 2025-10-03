@@ -14,6 +14,7 @@ import Animated, {
   withSpring,
 } from "react-native-reanimated";
 import Button from "./Button";
+import { Expandable } from "./Expandable";
 
 interface DraggableCardProps {
   title: string;
@@ -22,11 +23,13 @@ interface DraggableCardProps {
   drag: () => void;
   isActive: boolean;
   editMode: boolean;
+  isExpanded?: boolean;
+  isExercise?: boolean;
   onPressDetails?: () => void;
   onEditTitle?: (newTitle: string) => void;
   onDelete?: () => void;
-  exercisesCount?: number; // ex: 6 exercícios
-  intensity?: "Baixa" | "Média" | "Alta"; // badge de intensidade
+  exercisesCount?: number;
+  intensity?: "Baixa" | "Média" | "Alta";
 }
 
 export function DraggableCard({
@@ -39,14 +42,16 @@ export function DraggableCard({
   onPressDetails,
   onEditTitle,
   onDelete,
-  exercisesCount,
-  intensity,
+  isExercise = false,
+  isExpanded = false,
 }: DraggableCardProps) {
   const scheme = useColorScheme();
+  const theme = useTheme();
 
   const [localTitle, setLocalTitle] = useState(title);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [editingTitle, setEditingTitle] = useState(localTitle);
+  const [expanded, setExpanded] = useState(false);
 
   const translateX = useSharedValue(0);
 
@@ -56,9 +61,9 @@ export function DraggableCard({
       { translateX: translateX.value },
     ],
     shadowOffset: { width: 0, height: isActive ? 6 : 2 },
-    shadowOpacity: isActive ? 0.25 : 0.12,
-    shadowRadius: isActive ? 12 : 6,
-    elevation: isActive ? 10 : 4,
+    shadowOpacity: isRest ? 0 : isActive ? 0.25 : 0.12,
+    shadowRadius: isRest ? 0 : isActive ? 12 : 6,
+    elevation: isRest ? 0 : isActive ? 10 : 4,
   }));
 
   useEffect(() => {
@@ -76,75 +81,101 @@ export function DraggableCard({
     setEditingTitle(localTitle);
     setIsEditingTitle(false);
   };
-  const theme = useTheme();
+
+  if (isRest) {
+    return (
+      <Animated.View style={[styles.cardWrapper, animatedStyle]}>
+        <Pressable
+          onLongPress={drag}
+          delayLongPress={50}
+          disabled={editMode ? false : true}
+        >
+          <View
+            style={[
+              styles.restContainer,
+              {
+                backgroundColor:
+                  scheme === "dark"
+                    ? "transparent"
+                    : theme["background-basic-color-1"],
+              },
+            ]}
+          >
+            <View style={styles.left}>
+              {editMode && onDelete ? (
+                <Pressable onPress={onDelete}>
+                  <Ionicons name="trash-outline" size={24} color={"#ff3b30"} />
+                </Pressable>
+              ) : null}
+            </View>
+
+            <View style={styles.restCenter}>
+              <View
+                style={[
+                  styles.restLine,
+                  {
+                    backgroundColor: scheme === "dark" ? "#fff" : "#000",
+                    opacity: 0.12,
+                  },
+                ]}
+              />
+              <Text
+                category="h5"
+                style={[
+                  styles.restTitle,
+                  { backgroundColor: theme["background-basic-color-1"] },
+                ]}
+              >
+                {localTitle || "Dia de descanso"}
+              </Text>
+            </View>
+
+            <View style={styles.right}>
+              {editMode && (
+                <Ionicons
+                  name="reorder-three-outline"
+                  size={28}
+                  color={theme["color-secondary-500"]}
+                />
+              )}
+            </View>
+          </View>
+        </Pressable>
+      </Animated.View>
+    );
+  }
 
   return (
-    <Animated.View style={[styles.cardWrapper, animatedStyle, ,]}>
+    <Animated.View style={[styles.cardWrapper, animatedStyle]}>
       <Card
         style={[
           styles.card,
-          isRest
-            ? scheme === "dark"
-              ? { backgroundColor: "transparent" }
-              : { backgroundColor: "transparent" }
-            : scheme === "dark"
+          scheme === "dark"
             ? { backgroundColor: theme["background-basic-color-2"] }
             : { backgroundColor: theme["background-basic-color-2"] },
-          { marginTop: 10, height: 80, justifyContent: "center" },
         ]}
-        onPress={onPressDetails}
-        disabled={!!isRest}
+        onPress={() => {
+          onPressDetails?.();
+          setExpanded(!expanded);
+        }}
       >
-        {isRest && (
-          <View
-            style={{
-              position: "absolute",
-              top: "100%",
-              left: 60,
-              height: 2,
-              width: "78%",
-              backgroundColor: scheme === "dark" ? "#ffffff" : "#000",
-              zIndex: 0,
-            }}
-          />
-        )}
         <View style={styles.cardHeader}>
           <View style={styles.left}>
-            {isEditingTitle ? null : onDelete && editMode && !isEditingTitle ? (
+            {isEditingTitle ? null : onDelete && editMode ? (
               <Pressable onPress={onDelete}>
                 <Ionicons name="trash-outline" size={26} color={"#ff3b30"} />
               </Pressable>
-            ) : !isRest && !isEditingTitle ? (
-              <Ionicons name="barbell-outline" size={26} color={"#ff8800"} />
             ) : (
               <Ionicons
-                name="bed-outline"
-                size={28}
-                color={scheme === "dark" ? "#ffffff" : "#000"}
+                name="barbell-outline"
+                size={26}
+                color={theme["color-primary-500"]}
               />
             )}
           </View>
 
-          <View style={[styles.center, { alignItems: "center" }]}>
-            {isRest ? (
-              <View style={{ flexDirection: "row", gap: 20 }}>
-                <Text
-                  category="h5"
-                  style={[
-                    styles.title,
-                    {
-                      textAlign: "center",
-                      zIndex: 1,
-                      backgroundColor: theme["background-basic-color-1"],
-                      borderRadius: 20,
-                      paddingHorizontal: 12,
-                    },
-                  ]}
-                >
-                  Dia de descanso
-                </Text>
-              </View>
-            ) : isEditingTitle ? (
+          <View style={[styles.center]}>
+            {isEditingTitle && editMode ? (
               <>
                 <TextInput
                   value={editingTitle}
@@ -171,47 +202,13 @@ export function DraggableCard({
                   />
                 </View>
               </>
-            ) : editMode ? (
-              <Pressable onPress={() => setIsEditingTitle(true)}>
-                <Text category="h5" style={styles.title}>
-                  {localTitle}
-                </Text>
-              </Pressable>
             ) : (
               <>
-                <Text category="h5" style={styles.title}>
-                  {localTitle}
-                </Text>
-
-                <View style={styles.subInfo}>
-                  {exercisesCount && (
-                    <Text appearance="hint" category="s2">
-                      📋 {exercisesCount} exercícios
-                    </Text>
-                  )}
-                  {intensity && (
-                    <View
-                      style={[
-                        styles.badge,
-                        intensity === "Alta"
-                          ? { backgroundColor: "#ff5252" }
-                          : intensity === "Média"
-                          ? { backgroundColor: "#ff9800" }
-                          : { backgroundColor: "#4caf50" },
-                      ]}
-                    >
-                      <Text
-                        style={{
-                          color: "#fff",
-                          fontSize: 12,
-                          fontWeight: "600",
-                        }}
-                      >
-                        {intensity}
-                      </Text>
-                    </View>
-                  )}
-                </View>
+                <Pressable onPress={() => editMode && setIsEditingTitle(true)}>
+                  <Text category="h4" style={styles.title}>
+                    {localTitle}
+                  </Text>
+                </Pressable>
               </>
             )}
           </View>
@@ -222,22 +219,21 @@ export function DraggableCard({
                 <Ionicons
                   name="reorder-three-outline"
                   size={28}
-                  color={"#0040ff"}
+                  color={theme["color-secondary-500"]}
                 />
               </Pressable>
             ) : (
-              isRest && (
+              !isExercise && (
                 <Ionicons
-                  name="moon-outline"
-                  size={26}
-                  color={scheme === "dark" ? "#ffffff" : "#000"}
+                  name="chevron-down-outline"
+                  color={theme["text-basic-color"]}
+                  size={24}
                 />
               )
             )}
           </View>
         </View>
-
-        {!isRest && children}
+        <Expandable expanded={isExpanded}>{children}</Expandable>
       </Card>
     </Animated.View>
   );
@@ -245,7 +241,6 @@ export function DraggableCard({
 
 const styles = StyleSheet.create({
   cardWrapper: {
-    elevation: 5,
     marginHorizontal: 16,
     marginTop: 10,
   },
@@ -259,14 +254,42 @@ const styles = StyleSheet.create({
   },
   left: {
     alignItems: "flex-start",
-    width: 32,
+    width: 36,
+    justifyContent: "center",
   },
   center: {
     flex: 1,
+    paddingHorizontal: 6,
   },
   right: {
     alignItems: "flex-end",
-    width: 32,
+    width: 36,
+    justifyContent: "center",
+  },
+  restContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 2,
+    paddingHorizontal: 24,
+    borderRadius: 12,
+  },
+  restCenter: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "relative",
+  },
+  restLine: {
+    position: "absolute",
+    left: 8,
+    right: 8,
+    height: 1,
+    top: "50%",
+  },
+  restTitle: {
+    paddingHorizontal: 12,
+    zIndex: 2,
+    fontFamily: "TekoRegular",
   },
   button: {
     width: 110,
@@ -283,20 +306,16 @@ const styles = StyleSheet.create({
     fontSize: 22,
     borderBottomWidth: 1,
     borderBottomColor: "#ccc",
+    marginHorizontal: 30,
     paddingVertical: 2,
+    textAlign: "center",
   },
   title: {
     fontFamily: "TekoRegular",
+    textAlign: "center",
   },
   subInfo: {
-    flexDirection: "row",
     alignItems: "center",
-    gap: 12,
-    marginTop: 4,
-  },
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
+    marginTop: 10,
   },
 });

@@ -4,8 +4,6 @@ import {
   Pressable,
   StyleProp,
   StyleSheet,
-  Text,
-  TextStyle,
   ViewStyle,
 } from "react-native";
 import Animated, {
@@ -15,19 +13,19 @@ import Animated, {
 } from "react-native-reanimated";
 
 interface ButtonProps {
-  text: string;
+  content?: React.ReactNode;
   type?: "primary" | "secondary";
   onPress?: (event: GestureResponderEvent) => void;
+  onLongPress?: (event: GestureResponderEvent) => void;
   style?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<TextStyle>;
 }
 
 export default function Button({
-  text,
+  content,
   type = "primary",
   onPress,
+  onLongPress,
   style,
-  textStyle,
 }: ButtonProps) {
   const pressed = useSharedValue(0);
 
@@ -49,6 +47,8 @@ export default function Button({
     <Pressable
       onPressIn={() => (pressed.value = 1)}
       onPressOut={() => (pressed.value = 0)}
+      onLongPress={onLongPress}
+      delayLongPress={300}
       onPress={onPress}
     >
       <Animated.View
@@ -61,7 +61,7 @@ export default function Button({
           style,
         ]}
       >
-        <Text style={[styles.text, textStyle]}>{text}</Text>
+        {content}
       </Animated.View>
     </Pressable>
   );
@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     borderRadius: 10,
     alignItems: "center",
+    justifyContent: "center",
     shadowColor: "#000",
     shadowOpacity: 0.2,
     shadowOffset: { width: 0, height: 4 },
