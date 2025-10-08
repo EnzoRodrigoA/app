@@ -1,3 +1,4 @@
+// components/ParallaxScrollView.tsx
 import { Text, useTheme } from "@ui-kitten/components";
 import type { PropsWithChildren } from "react";
 import { StyleSheet, View } from "react-native";
@@ -11,7 +12,7 @@ import Animated, {
 
 import React from "react";
 
-const HEADER_HEIGHT = 100;
+const HEADER_HEIGHT = 150;
 
 type Props = PropsWithChildren<{
   title?: React.ReactNode;
@@ -45,61 +46,93 @@ export default function ParallaxScrollView({
           ),
         },
       ],
+      opacity: interpolate(scrollOffset.value, [0, HEADER_HEIGHT / 2], [1, 0]),
+    };
+  });
+
+  const contentAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateY: interpolate(
+            scrollOffset.value,
+            [0, HEADER_HEIGHT],
+            [0, -HEADER_HEIGHT * 0.3]
+          ),
+        },
+      ],
     };
   });
 
   return (
-    <Animated.ScrollView
-      ref={scrollRef}
-      style={{ backgroundColor: theme["background-basic-color-1"], flex: 1 }}
-      scrollEventThrottle={16}
-      entering={FadeIn.duration(600)}
-    >
-      <Animated.View
-        style={[
-          styles.header,
-          { backgroundColor: theme["background-basic-color-1"] },
-          headerAnimatedStyle,
-        ]}
+    <View style={[styles.container]}>
+      <Animated.ScrollView
+        ref={scrollRef}
+        style={{
+          backgroundColor: theme["background-basic-color-1"],
+          flex: 1,
+        }}
+        scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
+        entering={FadeIn.duration(600)}
       >
-        <Text category="h1" style={styles.title}>
-          {title}
-        </Text>
-        <Text category="p1" style={styles.text}>
-          {subtitle}
-        </Text>
-      </Animated.View>
+        <Animated.View
+          style={[
+            styles.header,
+            {
+              backgroundColor: theme["background-basic-color-1"],
+              height: HEADER_HEIGHT,
+            },
+            headerAnimatedStyle,
+          ]}
+        >
+          <Text category="h1" style={styles.title}>
+            {title}
+          </Text>
+          {subtitle && (
+            <Text category="p1" style={styles.subtitle}>
+              {subtitle}
+            </Text>
+          )}
+        </Animated.View>
 
-      <View
-        style={[
-          styles.content,
-          { backgroundColor: theme["background-basic-color-1"] },
-        ]}
-      >
-        {children}
-      </View>
-    </Animated.ScrollView>
+        <Animated.View
+          style={[
+            styles.content,
+            { backgroundColor: theme["background-basic-color-1"] },
+            contentAnimatedStyle,
+          ]}
+        >
+          {children}
+        </Animated.View>
+      </Animated.ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   header: {
-    height: HEADER_HEIGHT,
     overflow: "hidden",
     justifyContent: "flex-end",
-    marginTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
   },
   title: {
-    fontFamily: "TekoMedium",
+    fontFamily: "TekoRegular",
+    fontSize: 38,
+    marginBottom: 4,
   },
-  text: {
+  subtitle: {
     fontFamily: "RobotoLight",
+    fontSize: 16,
+    opacity: 0.7,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 10,
-    gap: 16,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
 });

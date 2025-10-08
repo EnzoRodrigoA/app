@@ -3,7 +3,7 @@ import axios from "axios";
 import { router } from "expo-router";
 
 const api = axios.create({
-  baseURL: "https://wolfit-pr-43.onrender.com/api/v1",
+  baseURL: "https://wolfit-1.onrender.com/api/v1",
   headers: { "Content-Type": "application/json" },
 });
 
