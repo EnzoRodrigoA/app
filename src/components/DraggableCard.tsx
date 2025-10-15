@@ -1,20 +1,15 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { Card, Text, useTheme } from "@ui-kitten/components";
 import { ReactNode, useEffect, useState } from "react";
-import {
-  Pressable,
-  StyleSheet,
-  TextInput,
-  View,
-  useColorScheme,
-} from "react-native";
+import { Pressable, StyleSheet, TextInput, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import Button from "./Button";
 import { Expandable } from "./Expandable";
+import Button from "./UI/Button";
+import { Text } from "./UI/Text";
 
 interface DraggableCardProps {
   title: string;
@@ -45,8 +40,7 @@ export function DraggableCard({
   isExercise = false,
   isExpanded = false,
 }: DraggableCardProps) {
-  const scheme = useColorScheme();
-  const theme = useTheme();
+  const { theme } = useTheme();
 
   const [localTitle, setLocalTitle] = useState(title);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -94,17 +88,18 @@ export function DraggableCard({
             style={[
               styles.restContainer,
               {
-                backgroundColor:
-                  scheme === "dark"
-                    ? "transparent"
-                    : theme["background-basic-color-1"],
+                backgroundColor: theme.colors.background.primary,
               },
             ]}
           >
             <View style={styles.left}>
               {editMode && onDelete ? (
                 <Pressable onPress={onDelete}>
-                  <Ionicons name="trash-outline" size={24} color={"#ff3b30"} />
+                  <Ionicons
+                    name="trash-outline"
+                    size={24}
+                    color={theme.colors.error[500]}
+                  />
                 </Pressable>
               ) : null}
             </View>
@@ -114,16 +109,16 @@ export function DraggableCard({
                 style={[
                   styles.restLine,
                   {
-                    backgroundColor: scheme === "dark" ? "#fff" : "#000",
+                    backgroundColor: theme.colors.text.primary,
                     opacity: 0.12,
                   },
                 ]}
               />
               <Text
-                category="h5"
+                variant="h2"
                 style={[
                   styles.restTitle,
-                  { backgroundColor: theme["background-basic-color-1"] },
+                  { backgroundColor: theme.colors.background.primary },
                 ]}
               >
                 {localTitle || "Dia de descanso"}
@@ -135,7 +130,7 @@ export function DraggableCard({
                 <Ionicons
                   name="reorder-three-outline"
                   size={28}
-                  color={theme["color-secondary-500"]}
+                  color={theme.colors.secondary[500]}
                 />
               )}
             </View>
@@ -147,29 +142,33 @@ export function DraggableCard({
 
   return (
     <Animated.View style={[styles.cardWrapper, animatedStyle]}>
-      <Card
-        style={[
-          styles.card,
-          scheme === "dark"
-            ? { backgroundColor: theme["background-basic-color-2"] }
-            : { backgroundColor: theme["background-basic-color-2"] },
-        ]}
+      <Pressable
         onPress={() => {
           onPressDetails?.();
           setExpanded(!expanded);
         }}
+        style={[
+          styles.card,
+          {
+            backgroundColor: theme.colors.background.secondary,
+          },
+        ]}
       >
         <View style={styles.cardHeader}>
           <View style={styles.left}>
             {isEditingTitle ? null : onDelete && editMode ? (
               <Pressable onPress={onDelete}>
-                <Ionicons name="trash-outline" size={26} color={"#ff3b30"} />
+                <Ionicons
+                  name="trash-outline"
+                  size={26}
+                  color={theme.colors.error[500]}
+                />
               </Pressable>
             ) : (
               <Ionicons
                 name="barbell-outline"
                 size={26}
-                color={theme["color-primary-500"]}
+                color={theme.colors.primary[500]}
               />
             )}
           </View>
@@ -181,21 +180,25 @@ export function DraggableCard({
                   value={editingTitle}
                   onChangeText={setEditingTitle}
                   placeholder="Nome do treino"
+                  placeholderTextColor={theme.colors.text.secondary}
                   style={[
                     styles.input,
-                    { color: scheme === "dark" ? "#fff" : "#000" },
+                    {
+                      color: theme.colors.text.primary,
+                      borderBottomColor: theme.colors.background.tertiary,
+                    },
                   ]}
                   autoFocus
                 />
                 <View style={styles.editButtons}>
                   <Button
-                    content={<Text>Cancelar</Text>}
+                    title="Cancelar"
                     onPress={handleCancelEdit}
                     type="secondary"
                     style={styles.button}
                   />
                   <Button
-                    content={<Text>Salvar</Text>}
+                    title="Salvar"
                     onPress={handleSaveTitle}
                     type="primary"
                     style={styles.button}
@@ -205,7 +208,7 @@ export function DraggableCard({
             ) : (
               <>
                 <Pressable onPress={() => editMode && setIsEditingTitle(true)}>
-                  <Text category="h4" style={styles.title}>
+                  <Text variant="h2" style={styles.title}>
                     {localTitle}
                   </Text>
                 </Pressable>
@@ -219,14 +222,14 @@ export function DraggableCard({
                 <Ionicons
                   name="reorder-three-outline"
                   size={28}
-                  color={theme["color-secondary-500"]}
+                  color={theme.colors.secondary[500]}
                 />
               </Pressable>
             ) : (
               !isExercise && (
                 <Ionicons
                   name="chevron-down-outline"
-                  color={theme["text-basic-color"]}
+                  color={theme.colors.text.primary}
                   size={24}
                 />
               )
@@ -234,7 +237,7 @@ export function DraggableCard({
           </View>
         </View>
         <Expandable expanded={isExpanded}>{children}</Expandable>
-      </Card>
+      </Pressable>
     </Animated.View>
   );
 }
@@ -243,10 +246,11 @@ const styles = StyleSheet.create({
   cardWrapper: {
     marginHorizontal: 16,
     marginTop: 10,
+    borderRadius: 16,
   },
   card: {
     borderRadius: 16,
-    borderWidth: 0,
+    padding: 18,
   },
   cardHeader: {
     flexDirection: "row",
@@ -269,7 +273,7 @@ const styles = StyleSheet.create({
   restContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 2,
+    paddingVertical: 16,
     paddingHorizontal: 24,
     borderRadius: 12,
   },
@@ -305,7 +309,6 @@ const styles = StyleSheet.create({
     fontFamily: "TekoRegular",
     fontSize: 22,
     borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
     marginHorizontal: 30,
     paddingVertical: 2,
     textAlign: "center",

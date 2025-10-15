@@ -1,8 +1,9 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import Slider from "@react-native-community/slider";
-import { Text, useTheme } from "@ui-kitten/components";
 import * as Hapitcs from "expo-haptics";
 import { memo, useState } from "react";
 import { StyleSheet, View } from "react-native";
+import { Text } from "./UI/Text";
 
 const moods = [
   { id: 1, emoji: "😮‍💨", label: "Fraco" },
@@ -64,7 +65,7 @@ export const MoodSlider = memo(function MoodSlider({
     moodLabel: {
       fontSize: normalizeSize(12),
       fontWeight: "bold",
-      color: theme["text-hint-color"],
+      color: theme.theme.colors.text.secondary,
     },
   });
 
@@ -73,10 +74,9 @@ export const MoodSlider = memo(function MoodSlider({
       <View style={dynamicStyles.highlightFeedback}>
         <Text style={dynamicStyles.highlightEmoji}>{currentMood?.emoji}</Text>
         <Text
-          category="s1"
           style={[
             dynamicStyles.highlightText,
-            { color: theme["text-basic-color"] },
+            { color: theme.theme.colors.text.disabled },
           ]}
         >
           {currentMood?.label}
@@ -88,9 +88,9 @@ export const MoodSlider = memo(function MoodSlider({
         minimumValue={1}
         maximumValue={5}
         step={1}
-        minimumTrackTintColor={theme["color-primary-500"]}
-        maximumTrackTintColor={theme["color-basic-600"]}
-        thumbTintColor={theme["color-primary-500"]}
+        minimumTrackTintColor={theme.theme.colors.primary[500]}
+        maximumTrackTintColor={theme.theme.colors.primary[600]}
+        thumbTintColor={theme.theme.colors.primary[500]}
         value={value}
         onValueChange={handleValueChange}
       />

@@ -1,118 +1,159 @@
-import ParallaxScrollView from "@/components/parallax-scroll-view";
-import { Card, Layout, Text } from "@ui-kitten/components";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { Card } from "@/components/UI/Card";
+import LineChart from "@/components/UI/Charts/AnimatedLineChart";
+import AnimatedText from "@/components/UI/Charts/AnimatedLineChart/AnimatedText";
+import ParallaxScrollView from "@/components/UI/Layout/ParallaxScrollView";
+import { Text } from "@/components/UI/Text";
+import { useTheme } from "@/contexts/ThemeContext";
+import { data } from "@/data/data";
+import { useFont } from "@shopify/react-native-skia";
+import { useState } from "react";
+import { StyleSheet, useWindowDimensions, View } from "react-native";
+import { useSharedValue } from "react-native-reanimated";
 
-interface Workout {
-  id: number;
-  title: string;
-  exercises: number;
-  duration: string;
-  icon: string;
-}
-const workouts: Workout[] = [
-  {
-    id: 1,
-    title: "Peito e Tríceps",
-    exercises: 6,
-    duration: "45 min",
-    icon: "fitness",
-  },
-  {
-    id: 2,
-    title: "Costas e Bíceps",
-    exercises: 5,
-    duration: "50 min",
-    icon: "barbell",
-  },
-  {
-    id: 3,
-    title: "Perna Completa",
-    exercises: 7,
-    duration: "60 min",
-    icon: "flash",
-  },
-];
+export const DashboardScreen = () => {
+  const { theme } = useTheme();
 
-export default function TabTwoScreen() {
+  const CHART_HEIGHT = 300;
+  const CHART_MARGIN = 10;
+  const { width: CHART_WIDTH } = useWindowDimensions();
+  const [selectedDate, setSelectedDate] = useState("Total");
+  const selectedValue = useSharedValue(0);
+
+  const font = useFont(require("@/assets/fonts/Teko/Teko-Regular.ttf"), 32);
+
+  if (!font) {
+    return null;
+  }
+
   return (
-    <ParallaxScrollView
-      title="Treinos"
-      subtitle="Aqui você pode acompanhar seus treinos diários"
-    >
-      {workouts.map((workout) => (
-        <View key={workout.id} style={styles.cardWrapper}>
-          <Card status="primary" style={styles.card}>
-            <Layout style={styles.cardHeader}>
-              <Text category="h4" style={styles.cardTitle}>
-                {workout.title}
-              </Text>
-            </Layout>
-            <Text category="p1" style={styles.cardInfo}>
-              {workout.exercises} exercícios · {workout.duration}
+    <ParallaxScrollView title="Dashboard" subtitle="Acompanhe sua evolução">
+      <View style={styles.content}>
+        <AnimatedText font={font} selectedValue={selectedValue} />
+        <View style={styles.chartContainer}>
+          {selectedDate === "Total" ? (
+            <Text variant="h1">Volume {selectedDate}</Text>
+          ) : (
+            <Text variant="h1">Volume de {selectedDate}</Text>
+          )}
+
+          <LineChart
+            data={data}
+            chartHeight={CHART_HEIGHT}
+            chartMargin={CHART_MARGIN}
+            chartWidth={CHART_WIDTH}
+            setSelectedDate={setSelectedDate}
+            selectedValue={selectedValue}
+          />
+        </View>
+        <View style={styles.statsGrid}>
+          <Card
+            variant="filled"
+            borderRadius="medium"
+            padding="medium"
+            style={styles.statCard}
+          >
+            <Text
+              variant="h3"
+              style={[styles.statNumber, { color: theme.colors.primary[500] }]}
+            >
+              24
             </Text>
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>Ver detalhes</Text>
-            </TouchableOpacity>
+            <Text variant="caption" style={styles.statLabel}>
+              Treinos Realizados
+            </Text>
+          </Card>
+
+          <Card
+            variant="filled"
+            borderRadius="medium"
+            padding="medium"
+            style={styles.statCard}
+          >
+            <Text
+              variant="h3"
+              style={[styles.statNumber, { color: theme.colors.success[500] }]}
+            >
+              85%
+            </Text>
+            <Text variant="caption" style={styles.statLabel}>
+              Taxa de Conclusão
+            </Text>
+          </Card>
+
+          <Card
+            variant="filled"
+            borderRadius="medium"
+            padding="medium"
+            style={styles.statCard}
+          >
+            <Text
+              variant="h3"
+              style={[styles.statNumber, { color: theme.colors.info[500] }]}
+            >
+              12h
+            </Text>
+            <Text variant="caption" style={styles.statLabel}>
+              Tempo Total
+            </Text>
+          </Card>
+
+          <Card
+            variant="filled"
+            borderRadius="medium"
+            padding="medium"
+            style={styles.statCard}
+          >
+            <Text
+              variant="h3"
+              style={[styles.statNumber, { color: theme.colors.warning[500] }]}
+            >
+              1560
+            </Text>
+            <Text variant="caption" style={styles.statLabel}>
+              Calorias Queimadas
+            </Text>
           </Card>
         </View>
-      ))}
+      </View>
     </ParallaxScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 40,
-    paddingHorizontal: 16,
+    flex: 1,
   },
-  titleContainer: {
-    marginTop: 16,
-    backgroundColor: "transparent",
+  chartContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: 40,
   },
-  title: {
-    fontFamily: "TekoRegular",
-  },
-  subtitle: {
-    marginBottom: 16,
-    fontSize: 16,
-    opacity: 0.7,
-    fontFamily: "RobotoLight",
-  },
-  cardWrapper: {
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 5,
-    marginBottom: 16,
-  },
+  content: {},
   card: {
-    borderRadius: 20,
+    marginBottom: 20,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  cardHeader: {
+  statsGrid: {
     flexDirection: "row",
-    marginBottom: 8,
-    backgroundColor: "transparent",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
-  cardTitle: {
-    fontFamily: "TekoRegular",
-  },
-  cardInfo: {
-    fontSize: 14,
-    opacity: 0.8,
+  statCard: {
+    width: "48%",
+    alignItems: "center",
     marginBottom: 12,
-    fontFamily: "RobotoLight",
   },
-  button: {
-    alignSelf: "flex-start",
-    backgroundColor: "#4ade80",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 12,
+  statNumber: {
+    fontSize: 28,
+    paddingTop: 10,
+    marginBottom: 4,
   },
-  buttonText: {
-    color: "white",
-    fontFamily: "RobotoLight",
+  statLabel: {
+    textAlign: "center",
+    opacity: 0.8,
   },
 });
+
+export default DashboardScreen;

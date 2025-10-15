@@ -1,6 +1,7 @@
 import InputControlDial from "@/components/InputControlDial";
 import { MoodSlider } from "@/components/MoodSlider";
-import { Card, Text, useTheme } from "@ui-kitten/components";
+import { Text } from "@/components/UI/Text";
+import { useTheme } from "@/contexts/ThemeContext";
 import { memo } from "react";
 import { StyleSheet, View } from "react-native";
 
@@ -18,7 +19,6 @@ interface RepsMessage {
 interface ExerciseCardProps {
   item: Exercise;
   index: number;
-  // Props de estado e handlers passados de TopSets
   weight: string;
   reps: string;
   repsStatus: () => string;
@@ -47,7 +47,7 @@ const ExerciseCard = memo(function ExerciseCard({
   handleRepsChange,
   scaleWidth,
 }: ExerciseCardProps) {
-  const theme = useTheme();
+  const { theme } = useTheme();
 
   const normalizeSize = (size: number) => Math.round(size * scaleWidth);
 
@@ -62,29 +62,35 @@ const ExerciseCard = memo(function ExerciseCard({
       width: "100%",
       borderRadius: normalizeSize(28),
       paddingVertical: normalizeSize(12),
+      paddingHorizontal: normalizeSize(20),
       overflow: "hidden",
       maxHeight: 600,
       borderWidth: 0,
-      backgroundColor: theme["background-basic-color-2"],
+      backgroundColor: theme.colors.background.secondary,
     },
     cardHeader: {
       flexDirection: "row",
       justifyContent: "space-between",
+      alignItems: "flex-start",
       marginBottom: normalizeSize(20),
     },
     cardTitle: {
       fontFamily: "TekoRegular",
       fontSize: normalizeSize(32),
+      flex: 1,
+      marginRight: normalizeSize(12),
     },
     muscleBadge: {
       alignSelf: "flex-start",
       borderRadius: normalizeSize(12),
       paddingVertical: normalizeSize(6),
       paddingHorizontal: normalizeSize(16),
+      backgroundColor: theme.colors.primary[500],
     },
     muscleText: {
       fontSize: normalizeSize(15),
       fontWeight: "200",
+      color: "white",
     },
     inputsRow: {
       flex: 1,
@@ -118,33 +124,23 @@ const ExerciseCard = memo(function ExerciseCard({
         style={{
           flex: 1,
           shadowOpacity: 0.05,
-          shadowColor: theme["color-primary-500"],
+          shadowColor: theme.colors.primary[500],
           shadowOffset: {
             width: 0,
             height: normalizeSize(10),
           },
           elevation: 10,
           shadowRadius: normalizeSize(12),
+          width: "100%",
         }}
       >
-        <Card disabled style={cardStyle}>
+        <View style={cardStyle}>
           <View style={dynamicStyles.cardHeader}>
-            <Text category="h2" style={dynamicStyles.cardTitle}>
+            <Text variant="h1" style={dynamicStyles.cardTitle}>
               {item.name}
             </Text>
-            <View
-              style={[
-                dynamicStyles.muscleBadge,
-                { backgroundColor: theme["color-primary-500"] },
-              ]}
-            >
-              <Text
-                category="label"
-                style={[
-                  dynamicStyles.muscleText,
-                  { color: theme["text-control-color"] },
-                ]}
-              >
+            <View style={dynamicStyles.muscleBadge}>
+              <Text variant="caption" style={dynamicStyles.muscleText}>
                 {item.muscle.toUpperCase()}
               </Text>
             </View>
@@ -172,7 +168,7 @@ const ExerciseCard = memo(function ExerciseCard({
               scaleWidth={scaleWidth}
             />
             <Text
-              category="s2"
+              variant="body"
               style={[dynamicStyles.repsFeedback, { color: repsMessage.color }]}
             >
               {repsMessage.text}
@@ -181,17 +177,17 @@ const ExerciseCard = memo(function ExerciseCard({
 
           <View style={{ marginTop: 30, marginBottom: 10 }}>
             <Text
-              category="label"
+              variant="caption"
               style={[
                 dynamicStyles.moodLabel,
-                { color: theme["text-hint-color"] },
+                { color: theme.colors.text.secondary },
               ]}
             >
               COMO VOCÊ SE SENTIU?
             </Text>
             <MoodSlider scaleWidth={scaleWidth} />
           </View>
-        </Card>
+        </View>
       </View>
     </View>
   );

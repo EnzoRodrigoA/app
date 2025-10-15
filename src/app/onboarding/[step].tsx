@@ -1,17 +1,12 @@
 import { QuestionField } from "@/components/QuestionField";
-import { Skeleton } from "@/components/Skeleton";
+import { Skeleton } from "@/components/UI/Feedback/Skeleton";
+import { Text } from "@/components/UI/Text";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOnboarding } from "@/contexts/OnboardingContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import api from "@/services/api";
 import { Question } from "@/types/QuestionTypes";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  Button,
-  Divider,
-  Layout,
-  ProgressBar,
-  Text,
-} from "@ui-kitten/components";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -19,11 +14,14 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   StyleSheet,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 
 export default function OnboardingStep() {
   const router = useRouter();
+  const { theme } = useTheme();
   const [currentStep, setCurrentStep] = useState(0);
   const { answers, updateAnswer } = useOnboarding();
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -85,17 +83,49 @@ export default function OnboardingStep() {
   return (
     <KeyboardAvoidingView>
       <ScrollView>
-        <Layout style={styles.container}>
+        <View
+          style={[
+            styles.container,
+            { backgroundColor: theme.colors.background.primary },
+          ]}
+        >
           {questions.length ? (
             <>
-              <Text category="s1" appearance="hint" style={styles.headerText}>
+              <Text
+                variant="caption"
+                style={[
+                  styles.headerText,
+                  { color: theme.colors.text.secondary },
+                ]}
+              >
                 {`Pergunta ${currentStep + 1} de ${questions.length}`}
               </Text>
-              <ProgressBar
-                progress={(currentStep + 1) / questions.length}
-                style={styles.progressBar}
+
+              {/* Progress Bar Customizada */}
+              <View
+                style={[
+                  styles.progressBarContainer,
+                  { backgroundColor: theme.colors.background.tertiary },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.progressBar,
+                    {
+                      width: `${((currentStep + 1) / questions.length) * 100}%`,
+                      backgroundColor: theme.colors.primary[500],
+                    },
+                  ]}
+                />
+              </View>
+
+              {/* Divider Customizado */}
+              <View
+                style={[
+                  styles.divider,
+                  { backgroundColor: theme.colors.background.tertiary },
+                ]}
               />
-              <Divider style={styles.divider} />
 
               <Animated.View
                 key={currentStep}
@@ -109,23 +139,42 @@ export default function OnboardingStep() {
                   onChange={updateAnswer}
                 />
               </Animated.View>
-              <Button
+
+              {/* Botão Próxima/Finalizar */}
+              <TouchableOpacity
                 onPress={handleNext}
-                style={styles.button}
-                status={
-                  currentStep + 1 < questions.length ? "primary" : "success"
-                }
-                accessoryRight={
-                  isSubmitting
-                    ? () => <ActivityIndicator color="#fff" />
-                    : undefined
-                }
+                disabled={isSubmitting}
+                style={[
+                  styles.button,
+                  {
+                    backgroundColor:
+                      currentStep + 1 < questions.length
+                        ? theme.colors.primary[500]
+                        : theme.colors.success,
+                  },
+                ]}
               >
-                {currentStep + 1 < questions.length ? "Próxima" : "Finalizar"}
-              </Button>
-              <Button
-                style={[styles.button, { opacity: currentStep > 0 ? 1 : 0 }]}
-                appearance="outline"
+                {isSubmitting ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text variant="body" style={styles.buttonText}>
+                    {currentStep + 1 < questions.length
+                      ? "Próxima"
+                      : "Finalizar"}
+                  </Text>
+                )}
+              </TouchableOpacity>
+
+              {/* Botão Voltar */}
+              <TouchableOpacity
+                style={[
+                  styles.button,
+                  styles.outlineButton,
+                  {
+                    opacity: currentStep > 0 ? 1 : 0,
+                    borderColor: theme.colors.primary[500],
+                  },
+                ]}
                 onPress={async () => {
                   if (currentStep > 0) {
                     setCurrentStep(currentStep - 1);
@@ -134,11 +183,19 @@ export default function OnboardingStep() {
                   }
                 }}
               >
-                Voltar
-              </Button>
+                <Text
+                  variant="body"
+                  style={[
+                    styles.outlineButtonText,
+                    { color: theme.colors.primary[500] },
+                  ]}
+                >
+                  Voltar
+                </Text>
+              </TouchableOpacity>
             </>
           ) : (
-            <Layout style={styles.skeletonContainer}>
+            <View style={styles.skeletonContainer}>
               <Skeleton
                 style={{
                   width: "60%",
@@ -150,9 +207,9 @@ export default function OnboardingStep() {
                 style={{ width: "100%", height: 48, marginBottom: 12 }}
               />
               <Skeleton style={{ width: "100%", height: 48 }} />
-            </Layout>
+            </View>
           )}
-        </Layout>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -164,9 +221,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingVertical: 50,
   },
-  progressBar: {
+  progressBarContainer: {
     marginBottom: 16,
     height: 8,
+    borderRadius: 4,
+    overflow: "hidden",
+  },
+  progressBar: {
+    height: "100%",
     borderRadius: 4,
   },
   loadingContainer: {
@@ -181,6 +243,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     marginBottom: 24,
+    height: 1,
   },
   questionContainer: {
     flex: 1,
@@ -188,6 +251,23 @@ const styles = StyleSheet.create({
   },
   button: {
     marginTop: 24,
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  outlineButton: {
+    backgroundColor: "transparent",
+    borderWidth: 2,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  outlineButtonText: {
+    fontWeight: "600",
+    fontSize: 16,
   },
   skeletonContainer: {
     flex: 1,

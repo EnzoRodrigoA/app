@@ -1,18 +1,15 @@
-import themeDark from "@/theme/theme-dark.json";
-import themeLight from "@/theme/theme-light.json";
-import * as eva from "@eva-design/eva";
 import {
   DarkTheme,
   DefaultTheme,
-  ThemeProvider,
+  ThemeProvider as NavigationThemeProvider,
 } from "@react-navigation/native";
-import { ApplicationProvider } from "@ui-kitten/components";
 import * as Font from "expo-font";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "react-native-reanimated";
 import { AuthProvider, useAuth } from "../contexts/AuthContext";
+import { ThemeProvider } from "../contexts/ThemeContext";
 import { useColorScheme } from "../hooks/use-color-scheme";
 
 export const unstable_settings = {
@@ -26,7 +23,9 @@ function LayoutWithAuth() {
   if (loading) return null;
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <NavigationThemeProvider
+      value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+    >
       <Stack>
         <Stack.Protected guard={!isLoggedIn}>
           <Stack.Screen name="sign-in" options={{ headerShown: false }} />
@@ -54,12 +53,11 @@ function LayoutWithAuth() {
         </Stack.Protected>
       </Stack>
       <StatusBar style="auto" />
-    </ThemeProvider>
+    </NavigationThemeProvider>
   );
 }
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
   const [fontsLoaded] = Font.useFonts({
     RobotoRegular: require("@/assets/fonts/Roboto/Roboto-Regular.ttf"),
     RobotoMedium: require("@/assets/fonts/Roboto/Roboto-Medium.ttf"),
@@ -69,39 +67,16 @@ export default function RootLayout() {
     TekoRegular: require("@/assets/fonts/Teko/Teko-Regular.ttf"),
     TekoBold: require("@/assets/fonts/Teko/Teko-Bold.ttf"),
   });
+
   if (!fontsLoaded) return null;
-  const customMapping = {
-    strict: {
-      "text-font-family": "RobotoRegular",
 
-      "heading-1-font-family": "MegrimRegular",
-      "heading-2-font-family": "MegrimRegular",
-      "heading-3-font-family": "MegrimRegular",
-      "heading-4-font-family": "MegrimRegular",
-
-      "subtitle-1-font-family": "RobotoMedium",
-      "subtitle-2-font-family": "RobotoRegular",
-
-      "label-font-family": "RobotoMedium",
-      "caption-1-font-family": "RobotoRegular",
-      "caption-2-font-family": "RobotoLight",
-    },
-    components: {},
-  };
   return (
-    <GestureHandlerRootView>
-      <ApplicationProvider
-        {...eva}
-        theme={{
-          ...(colorScheme === "dark" ? eva.dark : eva.light),
-          ...(colorScheme === "dark" ? themeDark : themeLight),
-        }}
-        customMapping={customMapping}
-      >
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemeProvider>
         <AuthProvider>
           <LayoutWithAuth />
         </AuthProvider>
-      </ApplicationProvider>
+      </ThemeProvider>
     </GestureHandlerRootView>
   );
 }
