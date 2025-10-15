@@ -31,7 +31,7 @@ export function AnimatedIcon({
   repeat = 4,
   animationType = "rotate",
   delay = 0,
-  rotateDeg = 10,
+  rotateDeg = 22,
   scaleTo = 0.2,
 }: AnimatedIconProps) {
   const animationValue = useSharedValue(0);

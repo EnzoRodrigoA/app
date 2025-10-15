@@ -243,6 +243,7 @@ const styles = StyleSheet.create({
   title: {
     textAlign: "center",
     marginBottom: 24,
+    fontFamily: "TekoRegular",
   },
   input: {
     marginVertical: 8,

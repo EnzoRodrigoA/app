@@ -3,7 +3,7 @@ import axios from "axios";
 import { router } from "expo-router";
 
 const api = axios.create({
-  baseURL: "https://wolfit-pr-42.onrender.com/api/v1",
+  baseURL: "https://wolfit-pr-43.onrender.com/api/v1",
   headers: { "Content-Type": "application/json" },
 });
 
@@ -19,7 +19,6 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log("REQUEST HEADERS:", config.headers);
     return config;
   },
   (error) => Promise.reject(error)

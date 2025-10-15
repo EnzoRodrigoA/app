@@ -37,12 +37,36 @@ export default function OnboardingStep() {
       .catch(console.error);
   }, []);
 
+  useEffect(() => {
+    AsyncStorage.setItem("onboardingAnswers", JSON.stringify(answers));
+    AsyncStorage.setItem("onboardingStep", currentStep.toString());
+  }, [answers, currentStep]);
+
+  useEffect(() => {
+    async function restoreProgress() {
+      const storedAnswers = await AsyncStorage.getItem("onboardingAnswers");
+      const storedStep = await AsyncStorage.getItem("onboardingStep");
+
+      if (storedAnswers) {
+        const parsed = JSON.parse(storedAnswers);
+        Object.entries(parsed).forEach(([id, value]) =>
+          updateAnswer(id, value)
+        );
+      }
+
+      if (storedStep) {
+        setCurrentStep(Number(storedStep));
+      }
+    }
+
+    restoreProgress();
+  }, [questions, updateAnswer]);
+
   const question = questions[currentStep];
+
   const handleNext = async () => {
     if (currentStep + 1 < questions.length) {
       setCurrentStep(currentStep + 1);
-      await AsyncStorage.setItem("hasCompletedOnboarding", "false");
-      setHasCompletedOnboarding(false);
     } else {
       setIsSubmitting(true);
       try {
@@ -106,11 +130,6 @@ export default function OnboardingStep() {
                   if (currentStep > 0) {
                     setCurrentStep(currentStep - 1);
                   } else {
-                    await AsyncStorage.setItem(
-                      "hasCompletedOnboarding",
-                      "false"
-                    );
-                    setHasCompletedOnboarding(false);
                     router.replace("/(tabs)");
                   }
                 }}
@@ -158,6 +177,7 @@ const styles = StyleSheet.create({
   headerText: {
     marginBottom: 16,
     textAlign: "center",
+    fontFamily: "RobotoLight",
   },
   divider: {
     marginBottom: 24,
@@ -171,7 +191,7 @@ const styles = StyleSheet.create({
   },
   skeletonContainer: {
     flex: 1,
-    justifyContent: "center", // centraliza verticalmente
+    justifyContent: "center",
     paddingHorizontal: 12,
   },
 });

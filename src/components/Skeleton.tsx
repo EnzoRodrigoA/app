@@ -30,13 +30,14 @@ export const Skeleton = ({
   }, [opacity]);
 
   return (
-    <Layout style={{ alignItems: "center", justifyContent: "center" }}>
+    <Layout style={{ alignItems: "center" }}>
       <Animated.View
         style={[
           {
             width,
             height,
             borderRadius: 4,
+            justifyContent,
             backgroundColor: "#E1E1E1",
             opacity,
           },
