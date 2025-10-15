@@ -1,10 +1,11 @@
 import { AnimatedIcon } from "@/components/animated-icon";
-import ParallaxScrollView from "@/components/parallax-scroll-view";
-import { Skeleton } from "@/components/Skeleton";
+import { Skeleton } from "@/components/UI/Feedback/Skeleton";
+import ParallaxScrollView from "@/components/UI/Layout/ParallaxScrollView";
+import { Text } from "@/components/UI/Text";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import api from "@/services/api";
 import { Ionicons } from "@expo/vector-icons";
-import { Card, Divider, Layout, Text, useTheme } from "@ui-kitten/components";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
@@ -12,7 +13,7 @@ import Animated, { FadeInRight } from "react-native-reanimated";
 
 export default function HomeScreen() {
   const { logout, isLoggedIn } = useAuth();
-  const theme = useTheme();
+  const { theme } = useTheme();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -54,7 +55,12 @@ export default function HomeScreen() {
   }, [isLoggedIn, router]);
 
   return loading && !settings ? (
-    <Layout style={styles.skeletonContainer}>
+    <View
+      style={[
+        styles.skeletonContainer,
+        { backgroundColor: theme.colors.background.primary },
+      ]}
+    >
       <Skeleton
         style={{
           width: "80%",
@@ -64,7 +70,7 @@ export default function HomeScreen() {
       />
       <Skeleton style={{ width: "100%", height: 200, marginBottom: 12 }} />
       <Skeleton style={{ width: "100%", height: 60 }} />
-    </Layout>
+    </View>
   ) : (
     <ParallaxScrollView
       title={
@@ -78,46 +84,67 @@ export default function HomeScreen() {
     >
       <Animated.View entering={FadeInRight.duration(600).delay(300)}>
         {settings && (
-          <Card style={styles.infoCard}>
-            <Text category="s1" style={styles.cardTitle}>
+          <View
+            style={[
+              styles.infoCard,
+              {
+                backgroundColor: theme.colors.background.secondary,
+                borderColor: theme.colors.background.tertiary,
+              },
+            ]}
+          >
+            <Text variant="h2" style={styles.cardTitle}>
               Seus dados
             </Text>
-            <Divider style={{ marginVertical: 8 }} />
+            <View
+              style={[
+                styles.divider,
+                { backgroundColor: theme.colors.background.tertiary },
+              ]}
+            />
             <View style={styles.row}>
               <Ionicons
                 name="barbell-outline"
                 size={22}
-                color={theme["color-primary-500"]}
+                color={theme.colors.primary[500]}
               />
-              <Text style={styles.infoText}>Objetivo: {settings.goal}</Text>
+              <Text variant="body" style={styles.infoText}>
+                Objetivo: {settings.goal}
+              </Text>
             </View>
             <View style={styles.row}>
               <Ionicons
                 name="fitness-outline"
                 size={22}
-                color={theme["color-success-500"]}
+                color={theme.colors.success}
               />
-              <Text style={styles.infoText}>Peso: {settings.weight} kg</Text>
+              <Text variant="body" style={styles.infoText}>
+                Peso: {settings.weight} kg
+              </Text>
             </View>
             <View style={styles.row}>
               <Ionicons
                 name="body-outline"
                 size={22}
-                color={theme["color-warning-500"]}
+                color={theme.colors.warning}
               />
-              <Text style={styles.infoText}>Altura: {settings.height} cm</Text>
+              <Text variant="body" style={styles.infoText}>
+                Altura: {settings.height} cm
+              </Text>
             </View>
-          </Card>
+          </View>
         )}
       </Animated.View>
       <Animated.View entering={FadeInRight.duration(600).delay(600)}>
         <View style={styles.topBar}>
-          <Text status="danger">Sair</Text>
+          <Text variant="body" style={{ color: theme.colors.error }}>
+            Sair
+          </Text>
           <Pressable onPress={handleLogout}>
             <Ionicons
               name="log-out-outline"
               size={28}
-              color={theme["color-danger-500"]}
+              color={theme.colors.error}
             />
           </Pressable>
         </View>
@@ -148,10 +175,24 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 16,
     marginBottom: 20,
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   cardTitle: {
-    fontWeight: "bold",
+    fontWeight: "700",
     fontSize: 18,
+    marginBottom: 8,
+  },
+  divider: {
+    height: 1,
+    marginVertical: 8,
   },
   row: {
     flexDirection: "row",

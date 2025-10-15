@@ -1,4 +1,4 @@
-import { useTheme } from "@ui-kitten/components";
+import { useTheme } from "@/contexts/ThemeContext";
 import { format } from "date-fns";
 import { Text, View } from "react-native";
 import Animated, {
@@ -33,7 +33,7 @@ export const SingleBar = ({ maxHeight, width, day }: SingleBarProps) => {
         style={[
           {
             width: width,
-            backgroundColor: theme["color-primary-500"],
+            backgroundColor: theme.theme.colors.primary[500],
             borderRadius: 15,
             borderCurve: "continuous",
           },
@@ -46,7 +46,7 @@ export const SingleBar = ({ maxHeight, width, day }: SingleBarProps) => {
           textAlign: "center",
           fontSize: 14,
           marginTop: 5,
-          color: theme["text-basic-color"],
+          color: theme.theme.colors.text.primary,
           fontFamily: "RobotoLight",
           textTransform: "lowercase",
         }}

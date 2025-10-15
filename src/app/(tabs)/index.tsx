@@ -1,15 +1,16 @@
-// app/(tabs)/index.tsx
-import { AnimatedBarChart } from "@/components/AnimatedBarChart";
-import ParallaxScrollView from "@/components/parallax-scroll-view";
+import { Card } from "@/components/UI/Card";
+import ParallaxScrollView from "@/components/UI/Layout/ParallaxScrollView";
+import { Text } from "@/components/UI/Text";
 import { data } from "@/constants/constants";
+import { useTheme } from "@/contexts/ThemeContext";
 import api from "@/services/api";
 import { Ionicons } from "@expo/vector-icons";
-import { Card, Text, useTheme } from "@ui-kitten/components";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, RefreshControl, StyleSheet, View } from "react-native";
+import { AnimatedBarChart } from "../../components/UI/Charts/AnimatedBarChart";
 
-interface todayWorkout {
+interface TodayWorkout {
   id: string;
   name: string;
   workout_id: string;
@@ -17,8 +18,10 @@ interface todayWorkout {
 
 export default function HomeScreen() {
   const router = useRouter();
-  const theme = useTheme();
-  const [todayWorkout, setTodayWorkout] = useState<todayWorkout | null>(null);
+  const { theme } = useTheme();
+  const [todayWorkout, setTodayWorkout] = useState<TodayWorkout | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [activeWeekIndex, setActiveWeekIndex] = useState(0);
 
   const today = new Date();
@@ -30,174 +33,229 @@ export default function HomeScreen() {
   let todayString = today.toLocaleDateString("pt-BR", options);
   todayString = todayString.charAt(0).toUpperCase() + todayString.slice(1);
 
-  useEffect(() => {
-    const fetchTodayWorkout = async () => {
-      try {
-        const response = await api.get<todayWorkout>("/workouts/today");
-        setTodayWorkout(response.data);
-      } catch (error) {
-        console.error("Erro ao buscar treino de hoje:", error);
-      }
-    };
+  const fetchTodayWorkout = async () => {
+    try {
+      const response = await api.get<TodayWorkout>("/workouts/today");
+      setTodayWorkout(response.data);
+    } catch (error) {
+      console.error("Erro ao buscar treino de hoje:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchTodayWorkout();
   }, []);
 
-  return (
-    <ParallaxScrollView title="Hoje" subtitle={todayString}>
-      {/* Card do Treino de Hoje */}
-      <View style={styles.section}>
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchTodayWorkout();
+    } catch (error) {
+      console.error("Erro ao atualizar:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const renderTodayWorkoutCard = () => {
+    if (loading) {
+      return (
         <Card
-          onPress={() =>
-            router.push(`/complete-workout/${todayWorkout?.workout_id}`)
-          }
-          style={[
-            styles.todayWorkoutCard,
-            {
-              backgroundColor: theme["color-primary-600"],
-              borderColor: theme["color-primary-500"],
-            },
-          ]}
+          variant="filled"
+          borderRadius="large"
+          padding="large"
+          style={[styles.loadingCard, styles.todayWorkoutCard]}
         >
           <View style={styles.cardContent}>
             <View style={styles.cardTextContainer}>
-              <Text category="s2" style={styles.cardLabel}>
+              <View style={styles.skeletonText} />
+              <View style={[styles.skeletonText, { width: "70%" }]} />
+              <View style={[styles.skeletonText, { width: "50%" }]} />
+            </View>
+            <View style={styles.skeletonIcon} />
+          </View>
+        </Card>
+      );
+    }
+
+    const hasWorkout = !!todayWorkout;
+    const backgroundColor = hasWorkout
+      ? theme.colors.primary[500]
+      : theme.colors.text.disabled;
+
+    const handlePress = () => {
+      if (todayWorkout) {
+        router.push(`/complete-workout/${todayWorkout.workout_id}`);
+      } else {
+        router.push("/workout");
+      }
+    };
+
+    return (
+      <Card
+        variant="filled"
+        borderRadius="large"
+        padding="large"
+        onPress={handlePress}
+        style={[styles.todayWorkoutCard, { backgroundColor }]}
+      >
+        <View style={styles.cardContent}>
+          <View style={styles.cardTextContainer}>
+            <View style={styles.cardHeader}>
+              <Text
+                variant="caption"
+                style={[styles.cardLabel, { color: "white" }]}
+              >
                 {todayWorkout ? "TREINO DE HOJE" : "DIA DE DESCANSO"}
               </Text>
-              <Text category="h5" style={styles.cardTitle}>
-                {todayWorkout?.name || "Descanso Ativo"}
-              </Text>
-              <Text category="p2" style={styles.cardDescription}>
-                {todayWorkout
-                  ? "Toque para iniciar o treino"
-                  : "Aproveite para se recuperar!"}
-              </Text>
             </View>
-            <View
-              style={[
-                styles.iconContainer,
-                {
-                  backgroundColor: todayWorkout
-                    ? theme["color-primary-400"]
-                    : theme["color-basic-600"],
-                },
-              ]}
+            <Text variant="h2" style={[styles.cardTitle, { color: "white" }]}>
+              {todayWorkout?.name || "Descanso Ativo"}
+            </Text>
+            <Text
+              variant="caption"
+              style={[styles.cardDescription, { color: "white" }]}
             >
-              <Ionicons
-                name={todayWorkout ? "play" : "bed-outline"}
-                size={24}
-                color="white"
-              />
+              {todayWorkout
+                ? "Toque para iniciar o treino"
+                : "Aproveite para se recuperar!"}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.iconContainer,
+              {
+                backgroundColor: hasWorkout
+                  ? theme.colors.primary[600]
+                  : theme.colors.text.secondary,
+              },
+            ]}
+          >
+            <Ionicons
+              name={todayWorkout ? "play" : "bed-outline"}
+              size={24}
+              color="white"
+            />
+          </View>
+        </View>
+      </Card>
+    );
+  };
+
+  const renderQuickAccessGrid = () => {
+    const quickAccessItems = [
+      {
+        title: "Treinos",
+        icon: "barbell-outline" as const,
+        route: "/workout",
+        color: theme.colors.primary[500],
+        backgroundColor: `${theme.colors.primary[500]}20`,
+      },
+      {
+        title: "Exercícios",
+        icon: "list-outline" as const,
+        route: "/exercises",
+        color: theme.colors.info[500],
+        backgroundColor: `${theme.colors.info[500]}20`,
+      },
+      {
+        title: "Progresso",
+        icon: "stats-chart-outline" as const,
+        route: "/dashboard",
+        color: theme.colors.success[500],
+        backgroundColor: `${theme.colors.success[500]}20`,
+      },
+      {
+        title: "Perfil",
+        icon: "person-outline" as const,
+        route: "/user-profile",
+        color: theme.colors.warning[500],
+        backgroundColor: `${theme.colors.warning[500]}20`,
+      },
+    ];
+
+    return (
+      <View style={styles.navGrid}>
+        {quickAccessItems.map((item, index) => (
+          <Card
+            key={index}
+            variant="elevated"
+            borderRadius="medium"
+            padding="medium"
+            onPress={() => router.push(item.route as any)}
+            style={styles.navCard}
+          >
+            <View style={styles.navContent}>
+              <View
+                style={[
+                  styles.navIcon,
+                  { backgroundColor: item.backgroundColor },
+                ]}
+              >
+                <Ionicons name={item.icon} size={24} color={item.color} />
+              </View>
+              <Text
+                variant="body"
+                style={[styles.navTitle, { color: item.color }]}
+              >
+                {item.title}
+              </Text>
             </View>
+          </Card>
+        ))}
+      </View>
+    );
+  };
+
+  return (
+    <ParallaxScrollView
+      title="Hoje"
+      subtitle={todayString}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={[theme.colors.primary[500]]}
+        />
+      }
+    >
+      <View style={styles.section}>{renderTodayWorkoutCard()}</View>
+
+      <View style={styles.section}>
+        <Card variant="elevated" borderRadius="large" padding="large">
+          <View style={styles.chartHeader}>
+            <Text variant="h2" style={styles.sectionTitle}>
+              Progresso Semanal
+            </Text>
+            <Pressable onPress={() => router.push("/dashboard")}>
+              <Text
+                variant="caption"
+                style={[
+                  styles.seeAllText,
+                  { color: theme.colors.primary[500] },
+                ]}
+              >
+                Ver detalhes
+              </Text>
+            </Pressable>
+          </View>
+          <View style={styles.chartContainer}>
+            <AnimatedBarChart
+              weeks={data}
+              activeWeekIndex={activeWeekIndex}
+              onWeekChange={setActiveWeekIndex}
+            />
           </View>
         </Card>
       </View>
 
-      {/* Navegação Rápida */}
       <View style={styles.section}>
-        <Text category="h6" style={styles.sectionTitle}>
+        <Text variant="h2" style={styles.sectionTitle}>
           Acesso Rápido
         </Text>
-
-        <Pressable
-          onPress={() => router.replace("/workout")}
-          style={[
-            styles.navCard,
-            { backgroundColor: theme["color-primary-200"] },
-          ]}
-        >
-          <View
-            style={[
-              styles.navIcon,
-              { backgroundColor: theme["color-primary-300"] },
-            ]}
-          >
-            <Ionicons
-              name="barbell-outline"
-              size={24}
-              color={theme["color-primary-500"]}
-            />
-          </View>
-          <View style={styles.navTextContainer}>
-            <Text
-              category="s1"
-              style={[styles.navTitle, { color: theme["color-primary-700"] }]}
-            >
-              Meus Treinos
-            </Text>
-            <Text
-              category="c1"
-              style={[
-                styles.navSubtitle,
-                { color: theme["color-primary-900"] },
-              ]}
-            >
-              Gerencie sua rotina
-            </Text>
-          </View>
-        </Pressable>
-
-        <Pressable
-          onPress={() => router.push("/dashboard")}
-          style={[
-            styles.navCard,
-            { backgroundColor: theme["color-success-200"] },
-          ]}
-        >
-          <View
-            style={[
-              styles.navIcon,
-              { backgroundColor: theme["color-success-300"] },
-            ]}
-          >
-            <Ionicons
-              name="stats-chart-outline"
-              size={24}
-              color={theme["color-success-700"]}
-            />
-          </View>
-          <View style={styles.navTextContainer}>
-            <Text
-              category="s1"
-              style={[styles.navTitle, { color: theme["color-success-700"] }]}
-            >
-              Meu Progresso
-            </Text>
-            <Text
-              category="c1"
-              style={[
-                styles.navSubtitle,
-                { color: theme["color-success-900"] },
-              ]}
-            >
-              Acompanhe resultados
-            </Text>
-          </View>
-        </Pressable>
-      </View>
-
-      {/* Gráfico de Progresso */}
-      <View style={styles.section}>
-        <View style={styles.chartHeader}>
-          <Text category="h6" style={styles.sectionTitle}>
-            Progresso Semanal
-          </Text>
-          <Pressable onPress={() => router.push("/dashboard")}>
-            <Text
-              category="c1"
-              style={[styles.seeAllText, { color: theme["color-primary-500"] }]}
-            >
-              Ver detalhes
-            </Text>
-          </Pressable>
-        </View>
-        <View style={{ justifyContent: "center", alignItems: "center" }}>
-          <AnimatedBarChart
-            weeks={data}
-            activeWeekIndex={activeWeekIndex}
-            onWeekChange={setActiveWeekIndex}
-          />
-        </View>
+        {renderQuickAccessGrid()}
       </View>
     </ParallaxScrollView>
   );
@@ -208,23 +266,11 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   sectionTitle: {
-    fontFamily: "TekoRegular",
     fontSize: 22,
     marginBottom: 16,
   },
-  // Card do Treino de Hoje
   todayWorkoutCard: {
-    borderRadius: 20,
-    padding: 20,
     borderWidth: 0,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
   },
   cardContent: {
     flexDirection: "row",
@@ -235,23 +281,23 @@ const styles = StyleSheet.create({
     flex: 1,
     marginRight: 16,
   },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
   cardLabel: {
-    color: "white",
     opacity: 0.9,
-    fontFamily: "RobotoLight",
     fontSize: 12,
     marginBottom: 4,
   },
   cardTitle: {
-    color: "white",
-    fontFamily: "TekoRegular",
     fontSize: 24,
     marginBottom: 8,
   },
   cardDescription: {
-    color: "white",
     opacity: 0.8,
-    fontFamily: "RobotoLight",
   },
   iconContainer: {
     width: 50,
@@ -260,21 +306,36 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  // Navegação Rápida
-  navCard: {
+
+  statusText: {
+    fontSize: 12,
+  },
+  loadingCard: {
+    backgroundColor: "#f5f5f5",
+  },
+  skeletonText: {
+    height: 16,
+    backgroundColor: "#e0e0e0",
+    borderRadius: 8,
+    marginBottom: 8,
+  },
+  skeletonIcon: {
+    width: 50,
+    height: 50,
+    backgroundColor: "#e0e0e0",
+    borderRadius: 25,
+  },
+  navGrid: {
     flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    borderRadius: 16,
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+  },
+  navCard: {
+    width: "48%",
     marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+  },
+  navContent: {
+    alignItems: "center",
   },
   navIcon: {
     width: 48,
@@ -282,24 +343,20 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 12,
-  },
-  navTextContainer: {
-    flex: 1,
+    marginBottom: 8,
   },
   navTitle: {
-    fontFamily: "TekoRegular",
-    fontSize: 18,
-    marginBottom: 2,
-  },
-  navSubtitle: {
-    fontFamily: "RobotoLight",
+    textAlign: "center",
   },
   chartHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 12,
+  },
+  chartContainer: {
+    justifyContent: "center",
+    alignItems: "center",
   },
   seeAllText: {
     fontFamily: "RobotoLight",

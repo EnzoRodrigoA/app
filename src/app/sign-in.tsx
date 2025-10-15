@@ -1,4 +1,5 @@
-import { Button, Input, Layout, Text, useTheme } from "@ui-kitten/components";
+import { Text } from "@/components/UI/Text";
+import { useTheme } from "@/contexts/ThemeContext";
 import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -6,6 +7,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Animated, {
   FadeIn,
@@ -17,7 +21,7 @@ import Animated, {
 import { useAuth } from "../contexts/AuthContext";
 
 export default function Login() {
-  const theme = useTheme();
+  const { theme } = useTheme();
   const router = useRouter();
   const [message, setMessage] = useState<{
     text: string;
@@ -116,9 +120,14 @@ export default function Login() {
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <Layout style={styles.container}>
+      <View
+        style={[
+          styles.container,
+          { backgroundColor: theme.colors.background.primary },
+        ]}
+      >
         <Animated.View layout={LinearTransition.springify()}>
-          <Text category="h1" style={styles.title}>
+          <Text variant="h1" style={styles.title}>
             {isRegister ? "Criar conta" : "Login"}
           </Text>
         </Animated.View>
@@ -129,43 +138,103 @@ export default function Login() {
             exiting={FadeOutDown.duration(300)}
             style={{ width: "100%" }}
           >
-            <Input
-              style={styles.input}
-              label="Nome"
-              placeholder="Nome de usuário"
-              value={username}
-              onChangeText={setUsername}
-              caption={errors.username}
-              status={errors.username ? "danger" : "basic"}
-              disabled={loading ? true : false}
-            />
+            <View style={styles.inputContainer}>
+              <Text variant="body" style={styles.label}>
+                Nome
+              </Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: theme.colors.background.primary,
+                    borderColor: errors.username
+                      ? theme.colors.error[500]
+                      : theme.colors.background.tertiary,
+                    color: theme.colors.text.primary,
+                  },
+                ]}
+                placeholder="Nome de usuário"
+                placeholderTextColor={theme.colors.text.secondary}
+                value={username}
+                onChangeText={setUsername}
+                editable={!loading}
+              />
+              {errors.username && (
+                <Text
+                  variant="caption"
+                  style={[styles.errorText, { color: theme.colors.error[500] }]}
+                >
+                  {errors.username}
+                </Text>
+              )}
+            </View>
           </Animated.View>
         )}
 
-        <Input
-          style={styles.input}
-          label="Email"
-          placeholder="Digite seu email"
-          value={email}
-          onChangeText={setEmail}
-          autoCapitalize="none"
-          keyboardType="email-address"
-          caption={errors.email}
-          status={errors.email ? "danger" : "basic"}
-          disabled={loading ? true : false}
-        />
+        <View style={styles.inputContainer}>
+          <Text variant="body" style={styles.label}>
+            Email
+          </Text>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                backgroundColor: theme.colors.background.secondary,
+                borderColor: errors.email
+                  ? theme.colors.error[500]
+                  : theme.colors.background.tertiary,
+                color: theme.colors.text.primary,
+              },
+            ]}
+            placeholder="Digite seu email"
+            placeholderTextColor={theme.colors.text.secondary}
+            value={email}
+            onChangeText={setEmail}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            editable={!loading}
+          />
+          {errors.email && (
+            <Text
+              variant="caption"
+              style={[styles.errorText, { color: theme.colors.error[500] }]}
+            >
+              {errors.email}
+            </Text>
+          )}
+        </View>
 
-        <Input
-          style={styles.input}
-          label="Senha"
-          placeholder="Digite sua senha"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-          caption={errors.password}
-          status={errors.password ? "danger" : "basic"}
-          disabled={loading ? true : false}
-        />
+        <View style={styles.inputContainer}>
+          <Text variant="body" style={styles.label}>
+            Senha
+          </Text>
+          <TextInput
+            style={[
+              styles.input,
+              {
+                backgroundColor: theme.colors.background.secondary,
+                borderColor: errors.password
+                  ? theme.colors.error[500]
+                  : theme.colors.background.tertiary,
+                color: theme.colors.text.primary,
+              },
+            ]}
+            placeholder="Digite sua senha"
+            placeholderTextColor={theme.colors.text.secondary}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+            editable={!loading}
+          />
+          {errors.password && (
+            <Text
+              variant="caption"
+              style={[styles.errorText, { color: theme.colors.error[500] }]}
+            >
+              {errors.password}
+            </Text>
+          )}
+        </View>
 
         {isRegister && (
           <Animated.View
@@ -173,43 +242,75 @@ export default function Login() {
             exiting={FadeOutDown.duration(300)}
             style={{ width: "100%" }}
           >
-            <Input
-              style={styles.input}
-              label="Confirmar senha"
-              placeholder="Repita a senha"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-              caption={errors.confirmPassword}
-              status={errors.confirmPassword ? "danger" : "basic"}
-              disabled={loading ? true : false}
-            />
+            <View style={styles.inputContainer}>
+              <Text variant="body" style={styles.label}>
+                Confirmar senha
+              </Text>
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    backgroundColor: theme.colors.background.secondary,
+                    borderColor: errors.confirmPassword
+                      ? theme.colors.error[500]
+                      : theme.colors.background.tertiary,
+                    color: theme.colors.text.primary,
+                  },
+                ]}
+                placeholder="Repita a senha"
+                placeholderTextColor={theme.colors.text.secondary}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+                editable={!loading}
+              />
+              {errors.confirmPassword && (
+                <Text
+                  variant="caption"
+                  style={[styles.errorText, { color: theme.colors.error[500] }]}
+                >
+                  {errors.confirmPassword}
+                </Text>
+              )}
+            </View>
           </Animated.View>
         )}
-        <Animated.View layout={LinearTransition.springify()}>
-          <Button
-            style={styles.button}
-            size="medium"
-            onPress={handleSubmit}
-            accessoryLeft={
-              loading
-                ? () => <ActivityIndicator size="small" color="#fff" />
-                : undefined
-            }
-          >
-            {!loading && (isRegister ? "Cadastrar" : "Entrar")}
-          </Button>
 
-          <Text
-            appearance="hint"
-            style={styles.switchAuth}
-            onPress={() => setIsRegister((prev) => !prev)}
-            disabled={loading ? true : false}
+        <Animated.View layout={LinearTransition.springify()}>
+          <TouchableOpacity
+            style={[
+              styles.button,
+              { backgroundColor: theme.colors.primary[500] },
+              loading && styles.buttonDisabled,
+            ]}
+            onPress={handleSubmit}
+            disabled={loading}
           >
-            {isRegister
-              ? "Já tem uma conta? Faça login"
-              : "Não tem uma conta? Cadastre-se"}
-          </Text>
+            {loading ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text variant="body" style={styles.buttonText}>
+                {isRegister ? "Cadastrar" : "Entrar"}
+              </Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            onPress={() => setIsRegister((prev) => !prev)}
+            disabled={loading}
+          >
+            <Text
+              variant="caption"
+              style={[
+                styles.switchAuth,
+                { color: theme.colors.text.secondary },
+              ]}
+            >
+              {isRegister
+                ? "Já tem uma conta? Faça login"
+                : "Não tem uma conta? Cadastre-se"}
+            </Text>
+          </TouchableOpacity>
         </Animated.View>
 
         {message && (
@@ -221,15 +322,17 @@ export default function Login() {
               {
                 backgroundColor:
                   message.status === "danger"
-                    ? theme["color-danger-600"]
-                    : theme["color-success-600"],
+                    ? theme.colors.error[500]
+                    : theme.colors.success[500],
               },
             ]}
           >
-            <Text style={styles.toastText}>{message.text}</Text>
+            <Text variant="body" style={styles.toastText}>
+              {message.text}
+            </Text>
           </Animated.View>
         )}
-      </Layout>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -245,11 +348,39 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     fontFamily: "TekoRegular",
   },
-  input: {
+  inputContainer: {
     marginVertical: 8,
+    width: "100%",
+  },
+  label: {
+    marginBottom: 8,
+    fontWeight: "600",
+  },
+  input: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    fontSize: 16,
+  },
+  errorText: {
+    marginTop: 4,
+    fontSize: 12,
   },
   button: {
     marginTop: 24,
+    paddingVertical: 14,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
   },
   switchAuth: {
     textAlign: "center",

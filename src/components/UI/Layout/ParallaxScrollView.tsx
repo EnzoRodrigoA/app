@@ -1,7 +1,6 @@
-// components/ParallaxScrollView.tsx
-import { Text, useTheme } from "@ui-kitten/components";
-import type { PropsWithChildren } from "react";
-import { StyleSheet, View } from "react-native";
+import { useTheme } from "@/contexts/ThemeContext";
+import type { PropsWithChildren, ReactElement } from "react";
+import { RefreshControlProps, StyleSheet, View } from "react-native";
 import Animated, {
   FadeIn,
   interpolate,
@@ -9,6 +8,7 @@ import Animated, {
   useAnimatedStyle,
   useScrollOffset,
 } from "react-native-reanimated";
+import { Text } from "../Text";
 
 import React from "react";
 
@@ -17,12 +17,14 @@ const HEADER_HEIGHT = 150;
 type Props = PropsWithChildren<{
   title?: React.ReactNode;
   subtitle?: string;
+  refreshControl?: ReactElement<RefreshControlProps>;
 }>;
 
 export default function ParallaxScrollView({
   children,
   title,
   subtitle,
+  refreshControl,
 }: Props) {
   const theme = useTheme();
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
@@ -69,37 +71,34 @@ export default function ParallaxScrollView({
       <Animated.ScrollView
         ref={scrollRef}
         style={{
-          backgroundColor: theme["background-basic-color-1"],
+          backgroundColor: theme.theme.colors.background.primary,
           flex: 1,
         }}
         scrollEventThrottle={16}
         showsVerticalScrollIndicator={false}
         entering={FadeIn.duration(600)}
+        refreshControl={refreshControl}
       >
         <Animated.View
           style={[
             styles.header,
             {
-              backgroundColor: theme["background-basic-color-1"],
+              backgroundColor: theme.theme.colors.background.primary,
               height: HEADER_HEIGHT,
             },
             headerAnimatedStyle,
           ]}
         >
-          <Text category="h1" style={styles.title}>
+          <Text variant="h1" style={styles.title}>
             {title}
           </Text>
-          {subtitle && (
-            <Text category="p1" style={styles.subtitle}>
-              {subtitle}
-            </Text>
-          )}
+          {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
         </Animated.View>
 
         <Animated.View
           style={[
             styles.content,
-            { backgroundColor: theme["background-basic-color-1"] },
+            { backgroundColor: theme.theme.colors.background.primary },
             contentAnimatedStyle,
           ]}
         >
@@ -122,13 +121,13 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: "TekoRegular",
+    paddingTop: 10,
     fontSize: 38,
-    marginBottom: 4,
   },
   subtitle: {
     fontFamily: "RobotoLight",
     fontSize: 16,
-    opacity: 0.7,
+    opacity: 0.5,
   },
   content: {
     flex: 1,

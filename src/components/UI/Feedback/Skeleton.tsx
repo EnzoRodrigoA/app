@@ -1,6 +1,5 @@
-import { Layout } from "@ui-kitten/components";
 import { useEffect, useRef } from "react";
-import { Animated, Easing } from "react-native";
+import { Animated, Easing, View } from "react-native";
 
 export const Skeleton = ({
   width = "100%",
@@ -30,7 +29,7 @@ export const Skeleton = ({
   }, [opacity]);
 
   return (
-    <Layout style={{ alignItems: "center" }}>
+    <View style={{ alignItems: "center" }}>
       <Animated.View
         style={[
           {
@@ -44,6 +43,6 @@ export const Skeleton = ({
           style,
         ]}
       />
-    </Layout>
+    </View>
   );
 };

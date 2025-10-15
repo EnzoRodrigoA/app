@@ -1,4 +1,4 @@
-import { useTheme } from "@ui-kitten/components";
+import { useTheme } from "@/contexts/ThemeContext";
 import { ReactNode } from "react";
 import {
   Modal,
@@ -36,7 +36,7 @@ export default function AppModal({
         <View
           style={[
             styles.modalContent,
-            { backgroundColor: theme["background-basic-color-1"] },
+            { backgroundColor: theme.theme.colors.background.primary },
           ]}
         >
           {children}

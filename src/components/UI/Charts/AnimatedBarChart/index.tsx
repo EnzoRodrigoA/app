@@ -1,9 +1,9 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import { format } from "date-fns";
 import {
   ScrollView,
   StyleSheet,
   Text,
-  useColorScheme,
   useWindowDimensions,
   View,
 } from "react-native";
@@ -25,8 +25,8 @@ export const AnimatedBarChart = ({
 }: AnimatedBarChartProps) => {
   const { width: windowWidth } = useWindowDimensions();
   const activeWeek = weeks[activeWeekIndex];
-  const scheme = useColorScheme();
-  const BarChartWidth = windowWidth * 0.9;
+  const theme = useTheme();
+  const BarChartWidth = windowWidth * 0.8;
   const BarChartGap = 10;
   const BarWidth =
     (BarChartWidth - BarChartGap * (activeWeek.length - 1)) / activeWeek.length;
@@ -89,7 +89,7 @@ export const AnimatedBarChart = ({
               <Text
                 style={[
                   styles.label,
-                  { color: scheme === "dark" ? "white" : "black" },
+                  { color: theme.theme.colors.text.primary },
                 ]}
               >
                 Week of {format(week[0].day, "d MMMM")}

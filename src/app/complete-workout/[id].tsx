@@ -1,7 +1,8 @@
-import Button from "@/components/Button";
 import ExerciseCard from "@/components/ExerciseCard";
+import Button from "@/components/UI/Button";
+import { Text } from "@/components/UI/Text";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { Layout, Text, useTheme } from "@ui-kitten/components";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -9,7 +10,6 @@ import {
   Pressable,
   StyleSheet,
   TouchableWithoutFeedback,
-  useColorScheme,
   useWindowDimensions,
   View,
 } from "react-native";
@@ -25,8 +25,7 @@ const BASE_WIDTH = 375;
 
 export default function TopSets() {
   const router = useRouter();
-  const theme = useTheme();
-  const colorScheme = useColorScheme();
+  const { theme } = useTheme();
   const { height: MAX_HEIGHT, width: MAX_WIDTH } = useWindowDimensions();
 
   const scaleWidth = MAX_WIDTH / BASE_WIDTH;
@@ -37,7 +36,6 @@ export default function TopSets() {
   const [reps, setReps] = useState("10");
 
   useEffect(() => {
-    // Simulação da busca de exercícios
     setExercises([
       { id: "1", name: "Supino Reto", muscle: "Peito" },
       { id: "2", name: "Puxada Alta", muscle: "Costas" },
@@ -78,16 +76,16 @@ export default function TopSets() {
   const repsStatus = useCallback(() => {
     const repsNumber = parseInt(reps || "0");
     if (repsNumber === 0) {
-      return theme["text-basic-color"];
+      return theme.colors.text.primary;
     } else if (repsNumber < 3 || repsNumber > 15) {
-      return theme["color-danger-500"];
+      return theme.colors.error[500];
     } else if (
       (repsNumber >= 3 && repsNumber <= 4) ||
       (repsNumber >= 13 && repsNumber <= 15)
     ) {
-      return theme["color-warning-500"];
+      return theme.colors.warning[500];
     } else {
-      return theme["color-success-500"];
+      return theme.colors.success[500];
     }
   }, [reps, theme]);
 
@@ -97,32 +95,32 @@ export default function TopSets() {
     if (repsNumber === 0) {
       return {
         text: "",
-        color: theme["text-hint-color"],
+        color: theme.colors.text.secondary,
       };
     } else if (repsNumber >= 1 && repsNumber <= 2) {
       return {
         text: "Peso pode estar muito elevado",
-        color: theme["color-danger-500"],
+        color: theme.colors.error[500],
       };
     } else if (repsNumber >= 3 && repsNumber <= 4) {
       return {
         text: "Foco em cargas máximas",
-        color: theme["color-warning-500"],
+        color: theme.colors.warning[500],
       };
     } else if (repsNumber >= 5 && repsNumber <= 12) {
       return {
         text: "Ideal para construir massa muscular.",
-        color: theme["color-success-500"],
+        color: theme.colors.success[500],
       };
     } else if (repsNumber >= 13 && repsNumber <= 15) {
       return {
         text: "O peso pode estar leve demais.",
-        color: theme["color-warning-500"],
+        color: theme.colors.warning[500],
       };
     } else {
       return {
         text: "Foco em Resistência Muscular. Ajuste o peso.",
-        color: theme["color-danger-500"],
+        color: theme.colors.error[500],
       };
     }
   }, [reps, theme]);
@@ -157,21 +155,22 @@ export default function TopSets() {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <Layout style={styles.container}>
+      <View
+        style={[
+          styles.container,
+          { backgroundColor: theme.colors.background.primary },
+        ]}
+      >
         <View style={styles.header}>
           <View style={styles.headerContainer}>
-            <Text category="h4" style={styles.title}>
+            <Text variant="h1" style={styles.title}>
               Meu Treino
             </Text>
             <Pressable onPress={() => router.back()} style={{ padding: 10 }}>
               <Ionicons
                 name="close-outline"
                 size={36}
-                color={
-                  colorScheme === "dark"
-                    ? theme["text-basic-color"]
-                    : theme["text-basic-color"]
-                }
+                color={theme.colors.text.primary}
               />
             </Pressable>
           </View>
@@ -200,6 +199,7 @@ export default function TopSets() {
           }}
         >
           <Button
+            title=""
             style={{
               width: normalizeSize(60),
               height: normalizeSize(60),
@@ -207,7 +207,7 @@ export default function TopSets() {
               paddingVertical: 0,
               paddingHorizontal: 0,
             }}
-            content={
+            icon={
               <Ionicons
                 name="checkmark-circle-outline"
                 size={44}
@@ -216,7 +216,7 @@ export default function TopSets() {
             }
           />
         </View>
-      </Layout>
+      </View>
     </TouchableWithoutFeedback>
   );
 }

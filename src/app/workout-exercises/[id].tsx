@@ -1,16 +1,10 @@
-import Button from "@/components/Button";
 import { DraggableCard } from "@/components/DraggableCard";
 import AppModal from "@/components/Modal";
+import Button from "@/components/UI/Button";
+import { Text } from "@/components/UI/Text";
+import { useTheme } from "@/contexts/ThemeContext";
 import api from "@/services/api";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  IndexPath,
-  Input,
-  Select,
-  SelectItem,
-  Text,
-  useTheme,
-} from "@ui-kitten/components";
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -19,7 +13,9 @@ import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
+  TextInput,
   useColorScheme,
   View,
 } from "react-native";
@@ -79,7 +75,7 @@ const updateExercisesOrder = async (exercises: WorkoutExercise[]) => {
 
 export default function ExercisesScreen() {
   const { id: workoutId } = useLocalSearchParams<{ id: string }>();
-  const theme = useTheme();
+  const { theme } = useTheme();
 
   const [exercises, setExercises] = useState<WorkoutExercise[]>([]);
   const [loading, setLoading] = useState(false);
@@ -88,7 +84,6 @@ export default function ExercisesScreen() {
 
   const [availableExercises, setAvailableExercises] = useState<Exercise[]>([]);
   const [searchText, setSearchText] = useState("");
-  const [selectedIndex, setSelectedIndex] = useState<IndexPath | undefined>();
   const [selectedMuscle, setSelectedMuscle] = useState<string | null>(null);
 
   const muscles = ["Peito", "Costas", "Pernas", "Ombros", "Bíceps", "Tríceps"];
@@ -112,7 +107,6 @@ export default function ExercisesScreen() {
   const fetchAvailable = async (muscle?: string, name?: string) => {
     try {
       setLoading(true);
-
       const available = await getAvailableExercises(muscle, name);
       console.log("Exercises disponíveis:", available);
       setAvailableExercises(available);
@@ -134,6 +128,7 @@ export default function ExercisesScreen() {
 
       setShowAddModal(false);
       setSearchText("");
+      setSelectedMuscle(null);
     } catch (err) {
       console.error("Erro ao adicionar exercício:", err);
     } finally {
@@ -166,11 +161,11 @@ export default function ExercisesScreen() {
       <View
         style={[
           styles.container,
-          { backgroundColor: theme["background-basic-color-1"] },
+          { backgroundColor: theme.colors.background.primary },
         ]}
       >
         <View style={styles.header}>
-          <Text category="h1" style={styles.title}>
+          <Text variant="h1" style={styles.title}>
             Exercícios
           </Text>
           <Pressable onPress={() => router.back()}>
@@ -186,7 +181,7 @@ export default function ExercisesScreen() {
           {loading ? (
             <ActivityIndicator style={{ flex: 1 }} />
           ) : exercises.length === 0 ? (
-            <Text style={{ textAlign: "center", marginTop: 20 }}>
+            <Text variant="body" style={{ textAlign: "center", marginTop: 20 }}>
               Nenhum exercício adicionado.
             </Text>
           ) : (
@@ -210,7 +205,7 @@ export default function ExercisesScreen() {
                     isActive={isActive}
                     editMode={editMode}
                   >
-                    <Text category="c2" style={{ marginTop: 6 }}>
+                    <Text variant="caption" style={{ marginTop: 6 }}>
                       Músculo alvo: {item.muscle}
                     </Text>
                   </DraggableCard>
@@ -220,9 +215,6 @@ export default function ExercisesScreen() {
             />
           )}
         </View>
-
-        {/* // setShowAddModal(true);
-        // fetchAvailable(); */}
 
         {!loading && (
           <Animated.View
@@ -245,7 +237,7 @@ export default function ExercisesScreen() {
               }}
               style={[
                 styles.floatButton,
-                { backgroundColor: theme["color-primary-500"] },
+                { backgroundColor: theme.colors.primary[500] },
               ]}
             >
               <Ionicons
@@ -256,6 +248,7 @@ export default function ExercisesScreen() {
             </Pressable>
           </Animated.View>
         )}
+
         {editMode && !loading && (
           <Animated.View
             entering={FadeInRight.duration(300)}
@@ -263,11 +256,14 @@ export default function ExercisesScreen() {
             style={[styles.floatButtonContainer, { bottom: 100 }]}
           >
             <Pressable
-              onPress={() => setShowAddModal(true)}
-              disabled={loading ? true : false}
+              onPress={() => {
+                setShowAddModal(true);
+                fetchAvailable();
+              }}
+              disabled={loading}
               style={[
                 styles.floatButton,
-                { backgroundColor: theme["color-primary-600"] },
+                { backgroundColor: theme.colors.primary[600] },
               ]}
             >
               {loading ? (
@@ -280,36 +276,75 @@ export default function ExercisesScreen() {
         )}
 
         <AppModal visible={showAddModal} onClose={() => setShowAddModal(false)}>
-          <Text category="h5" style={{ marginBottom: 12 }}>
+          <Text variant="h2" style={{ marginBottom: 16 }}>
             Adicionar Exercício
           </Text>
 
-          <Select
-            placeholder="Selecione o grupo muscular"
-            selectedIndex={selectedIndex}
-            onSelect={(index) => {
-              const selected = index as IndexPath;
-              setSelectedIndex(selected);
-
-              const muscle = muscles[selected.row];
-              setSelectedMuscle(muscle);
-              fetchAvailable(muscle, searchText);
-            }}
-            style={{ marginBottom: 12 }}
+          {/* Select customizado para músculos */}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.muscleScroll}
           >
-            {muscles.map((muscle) => (
-              <SelectItem key={muscle} title={muscle} />
-            ))}
-          </Select>
+            <View style={styles.muscleContainer}>
+              {muscles.map((muscle) => (
+                <Pressable
+                  key={muscle}
+                  onPress={() => {
+                    setSelectedMuscle(
+                      muscle === selectedMuscle ? null : muscle
+                    );
+                    fetchAvailable(
+                      muscle === selectedMuscle ? undefined : muscle,
+                      searchText
+                    );
+                  }}
+                  style={[
+                    styles.muscleButton,
+                    {
+                      backgroundColor:
+                        muscle === selectedMuscle
+                          ? theme.colors.primary[500]
+                          : theme.colors.background.secondary,
+                      borderColor: theme.colors.background.tertiary,
+                    },
+                  ]}
+                >
+                  <Text
+                    variant="caption"
+                    style={[
+                      styles.muscleText,
+                      {
+                        color:
+                          muscle === selectedMuscle
+                            ? "white"
+                            : theme.colors.text.primary,
+                      },
+                    ]}
+                  >
+                    {muscle}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+          </ScrollView>
 
-          <Input
+          <TextInput
             placeholder="Buscar exercício..."
+            placeholderTextColor={theme.colors.text.secondary}
             value={searchText}
             onChangeText={(text) => {
               setSearchText(text);
               fetchAvailable(selectedMuscle ?? undefined, text);
             }}
-            style={{ marginBottom: 12 }}
+            style={[
+              styles.searchInput,
+              {
+                backgroundColor: theme.colors.background.secondary,
+                borderColor: theme.colors.background.tertiary,
+                color: theme.colors.text.primary,
+              },
+            ]}
           />
 
           <FlatList
@@ -318,10 +353,18 @@ export default function ExercisesScreen() {
             renderItem={({ item }) => (
               <Pressable
                 onPress={() => handleAddExercise(item.id)}
-                style={styles.exerciseItem}
+                style={[
+                  styles.exerciseItem,
+                  { borderBottomColor: theme.colors.background.tertiary },
+                ]}
               >
-                <Text category="s1">{item.exercise_name}</Text>
-                <Text appearance="hint" category="c2">
+                <Text variant="body" style={{ fontWeight: "600" }}>
+                  {item.exercise_name}
+                </Text>
+                <Text
+                  variant="caption"
+                  style={{ color: theme.colors.text.secondary }}
+                >
                   {item.target_muscle}
                 </Text>
               </Pressable>
@@ -330,7 +373,7 @@ export default function ExercisesScreen() {
           />
 
           <Button
-            content={<Text>Cancelar</Text>}
+            title="Cancelar"
             type="secondary"
             onPress={() => setShowAddModal(false)}
             style={{ marginTop: 12 }}
@@ -351,7 +394,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     marginTop: 50,
   },
-
   title: {
     fontFamily: "TekoRegular",
   },
@@ -368,11 +410,40 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
   exerciseItem: {
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+  },
+  muscleScroll: {
+    marginBottom: 12,
+  },
+  muscleContainer: {
+    flexDirection: "row",
+    gap: 8,
+    paddingVertical: 4,
+  },
+  muscleButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+  },
+  muscleText: {
+    fontWeight: "500",
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    fontSize: 16,
+    marginBottom: 12,
   },
 });

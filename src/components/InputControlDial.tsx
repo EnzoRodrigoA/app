@@ -1,8 +1,9 @@
+import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { Text, useTheme } from "@ui-kitten/components";
 import { memo } from "react";
 import { StyleSheet, TextInput, View } from "react-native";
-import Button from "./Button";
+import Button from "./UI/Button";
+import { Text } from "./UI/Text";
 
 interface InputControlDialProps {
   label: string;
@@ -35,7 +36,7 @@ const InputControlDial = memo(function InputControlDial({
     label: {
       fontSize: normalizeSize(16),
       fontWeight: "800",
-      color: theme["text-hint-color"],
+      color: theme.theme.colors.text.secondary,
       letterSpacing: 0.5,
     },
     dialControls: {
@@ -82,21 +83,23 @@ const InputControlDial = memo(function InputControlDial({
 
   return (
     <View style={dynamicStyles.container}>
-      <Text style={[dynamicStyles.label, { color: theme["text-basic-color"] }]}>
+      <Text
+        style={[
+          dynamicStyles.label,
+          { color: theme.theme.colors.text.primary },
+        ]}
+      >
         {label}
       </Text>
       <View style={dynamicStyles.dialControls}>
         <Button
+          title=""
           onPress={onDecrement}
-          style={[
-            dynamicStyles.dialButton,
-            { backgroundColor: theme["background-basic-color-3"] },
-          ]}
-          content={
+          icon={
             <Ionicons
               name="remove-outline"
-              size={normalizeSize(16)} // Tamanho do ícone normalizado
-              color={theme["text-basic-color"]}
+              size={normalizeSize(16)}
+              color={theme.theme.colors.text.primary}
             />
           }
         />
@@ -107,17 +110,17 @@ const InputControlDial = memo(function InputControlDial({
             onChangeText={onChangeText}
             keyboardType="numeric"
             selectTextOnFocus
-            selectionColor={theme["color-primary-500"]}
+            selectionColor={theme.theme.colors.primary[500]}
             style={[
               dynamicStyles.dialValue,
-              { color: valueColor || theme["text-basic-color"] },
+              { color: valueColor || theme.theme.colors.text.primary },
             ]}
             maxLength={5}
           />
           <Text
             style={[
               dynamicStyles.dialUnit,
-              { color: theme["text-hint-color"] },
+              { color: theme.theme.colors.text.secondary },
             ]}
           >
             {unit}
@@ -125,16 +128,13 @@ const InputControlDial = memo(function InputControlDial({
         </View>
 
         <Button
+          title=""
           onPress={onIncrement}
-          style={[
-            dynamicStyles.dialButton,
-            { backgroundColor: theme["background-basic-color-3"] },
-          ]}
-          content={
+          icon={
             <Ionicons
               name="add-outline"
-              size={normalizeSize(16)} // Tamanho do ícone normalizado
-              color={theme["text-basic-color"]}
+              size={normalizeSize(16)}
+              color={theme.theme.colors.text.primary}
             />
           }
         />

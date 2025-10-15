@@ -1,29 +1,24 @@
 import { HapticTab } from "@/components/haptic-tab";
-import { useColorScheme } from "@/hooks/use-color-scheme";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "@ui-kitten/components";
 import { Tabs } from "expo-router";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const theme = useTheme();
-  const backgroundColor =
-    colorScheme === "dark"
-      ? theme["background-basic-color-1"]
-      : theme["background-basic-color-1"];
+  const { theme } = useTheme();
+
+  const backgroundColor = theme.colors.background.primary;
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: theme["color-primary-500"],
-        tabBarInactiveTintColor: theme["text-hint-color"],
+        tabBarActiveTintColor: theme.colors.primary[500],
+        tabBarInactiveTintColor: theme.colors.text.secondary,
         headerShown: false,
         tabBarButton: HapticTab,
         tabBarStyle: {
           height: 80,
           borderTopWidth: 0,
           paddingTop: 0,
-
           backgroundColor: backgroundColor,
         },
       }}
