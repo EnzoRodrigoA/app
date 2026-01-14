@@ -164,3 +164,246 @@ Typography uses custom fonts: Roboto (body text) and Teko (headings/numbers).
 - Hooks: `use-kebab-case.ts`
 - Utils/Services: `camelCase.ts`
 - Types: `PascalCase.ts` (interfaces) ou dentro do componente se local
+
+---
+
+## Design System - Minimalista Clean (Jan 2026)
+
+### Filosofia de Design
+O app segue um design **minimalista clean** com foco em:
+- ✅ Breathing room generoso (24px horizontal, 32px entre seções)
+- ✅ Hierarquia visual clara (títulos → subtítulos → body)
+- ✅ Sombras sutis e consistentes
+- ✅ Animações suaves (600ms duration, delays escalonados)
+- ✅ Componentes modernos com borders arredondadas
+
+### Theme System
+
+**Spacing Scale** (`src/themes/light.ts` e `dark.ts`):
+```typescript
+spacing: {
+  xs: 4,    // Micro gaps
+  sm: 8,    // Small gaps
+  md: 12,   // Medium gaps
+  lg: 16,   // Large gaps
+  xl: 24,   // XL gaps (horizontal padding padrão)
+  xxl: 32,  // Section spacing padrão
+  xxxl: 48, // Large sections
+  xxxxl: 64 // Extra large sections
+}
+```
+
+**Shadow System** (Sutis para minimalismo):
+```typescript
+shadows: {
+  sm: { shadowOpacity: 0.05 },  // Cards suaves
+  md: { shadowOpacity: 0.08 },  // Cards elevados
+  lg: { shadowOpacity: 0.12 },  // Modals
+  xl: { shadowOpacity: 0.15 }   // Overlays
+}
+```
+
+**Border Radius**:
+- Cards pequenos: 16px
+- Cards principais: 20-24px
+- Buttons/Icons: 12-14px (pequenos), 24px (circulares)
+
+### Component Patterns
+
+#### **Card Component** (`src/components/UI/Card.tsx`)
+```tsx
+<Card
+  variant="elevated" | "outlined" | "filled"
+  borderRadius="small" | "medium" | "large"
+  padding="none" | "small" | "medium" | "large"
+>
+  <Card.Header /> {/* Opcional */}
+  <Card.Content /> {/* Principal */}
+  <Card.Footer />  {/* Opcional */}
+</Card>
+```
+
+**Uso comum**:
+- `elevated`: Cards flutuantes com sombra suave (default para a maioria)
+- `outlined`: Borders sutis para secondary content
+- `filled`: Background colorido (workout cards, CTAs)
+
+#### **Animation Patterns**
+
+**Entry Animations** (react-native-reanimated):
+```tsx
+// Padrão de delays escalonados
+<Animated.View entering={FadeInDown.duration(600).delay(100)}>
+<Animated.View entering={FadeInDown.duration(600).delay(200)}>
+<Animated.View entering={FadeInDown.duration(600).delay(300)}>
+```
+
+**Interaction Animations**:
+```tsx
+// Press scale effect
+const scale = useSharedValue(1);
+const animatedStyle = useAnimatedStyle(() => ({
+  transform: [{ scale: scale.value }]
+}));
+
+onPressIn={() => scale.value = withSpring(0.98)}
+onPressOut={() => scale.value = withSpring(1)}
+```
+
+### Screen Layouts
+
+#### **Home Screen** (`src/app/(tabs)/index.tsx`)
+Estrutura vertical com sections espaçadas:
+```
+1. Header (Avatar + Greeting)          - 32px bottom margin
+2. Streak Card (Separado)              - 16px bottom margin
+3. Weekly Progress Card (Separado)     - 32px bottom margin
+4. Today's Workout Card (Hero)         - 32px bottom margin
+   - Badge de status
+   - Gradient overlay
+   - Meta info com ícones
+   - CTA clara
+5. InsightPreviewCard (Mini chart)     - 32px bottom margin
+6. Progress Stats (2 stats)            - 32px bottom margin
+7. Tip Card (Opcional)
+```
+
+**Workout Card States**:
+- **Active Workout**: Primary blue, gradient overlay, 2 seções (info + CTA)
+- **Rest Day**: Secondary bg, border sutil, tips de recuperação
+- **Empty**: Dashed border, ícone em container circular, CTA clara
+
+#### **Dashboard Screen** (`src/app/(tabs)/dashboard.tsx`)
+```
+1. ParallaxScrollView (Header animado)
+2. Period Selector (Semana/Mês/Ano)   - Toggle buttons
+3. AnimatedText (Valor do período)
+4. LineChart (Volume chart animado)
+5. Divider visual                      - 32px vertical margin
+6. Stats Grid (2x2)                    - Ícones + números + labels
+```
+
+**Stats Cards**: 48% width, icons circulares coloridos, border sutil
+
+#### **Profile Screen** (`src/app/(tabs)/user-profile.tsx`)
+```
+1. ParallaxScrollView (Avatar wave)
+2. Personal Info Card                  - Ícones circulares, edit button
+3. ExpandableCard "Estatísticas"       - Collapsible stats
+4. ExpandableCard "Preferências"       - Settings toggles
+5. Logout Card                         - Warning style, outlined
+```
+
+**Gap between sections**: 16px
+
+### Custom Components
+
+#### **InsightPreviewCard** (`src/components/InsightPreviewCard.tsx`)
+Componente novo para preview de insights semanais:
+```tsx
+<InsightPreviewCard
+  weeklyData={[
+    { day: "seg", value: 0.8, label: "S" },
+    // ... 7 dias
+  ]}
+  trend={15}              // % vs semana passada
+  totalWorkouts={4}
+/>
+```
+
+**Features**:
+- Mini bar chart animado (80px altura)
+- Trend badge (↑ verde ou ↓ vermelho)
+- Link para dashboard
+- Card elevated com padding 20px
+
+### Animation Guidelines
+
+**Durations**:
+- Fast: 150ms (micro-interactions)
+- Normal: 300ms (transitions)
+- Standard: 600ms (entry animations - **padrão**)
+- Slow: 1000ms+ (charts, complex animations)
+
+**Delays** (entry animations):
+- 100ms, 200ms, 300ms, 400ms, 500ms, 600ms (escalonados)
+- Nunca mais de 6 elementos animados em sequência
+
+**Spring Config**:
+```tsx
+withSpring(value, {
+  damping: 15,   // Suave
+  stiffness: 150 // Responsivo
+})
+```
+
+### Color Usage
+
+**Primary Blue** (`#2196F3`):
+- Workout cards ativos
+- CTAs principais
+- Links e actions
+- Progress indicators
+
+**Success Green** (`#4CAF50`):
+- Streaks ativos
+- Completed states
+- Positive trends
+
+**Warning Orange** (`#FF9800`):
+- Rest day highlights
+- Alerts de platô
+- PRs e achievements
+
+**Gray Scale**:
+- 50-200: Backgrounds suaves
+- 300-500: Borders e dividers
+- 600-900: Text secondary to primary
+
+### Spacing Cheat Sheet
+
+**Paddings**:
+- Screen horizontal: `24px`
+- Card padding: `20px` (small), `24px` (medium)
+- Button padding: `12-16px` vertical, `20-24px` horizontal
+
+**Margins**:
+- Between sections: `32px`
+- Between related items: `16px`
+- Between tight items: `8-12px`
+
+**Gaps**:
+- Icon + text: `6-8px`
+- List items: `12-16px`
+- Grid items: `16px`
+
+### Accessibility
+
+- **Touch targets**: Min 44x44px (iOS HIG)
+- **Contrast ratio**: Min 4.5:1 (WCAG AA)
+- **Font sizes**: Min 14px para body text
+- **Haptic feedback**: Sempre em interactions importantes
+
+### Performance Tips
+
+- Use `react-native-reanimated` para animações (roda na UI thread)
+- Memoize components pesados com `React.memo`
+- Use `useCallback` para event handlers
+- Lazy load charts e components pesados
+- Otimize imagens (usar expo-image com blurhash)
+
+---
+
+## Changelog
+
+### Jan 2026 - Design System Minimalista Clean
+- ✅ Refatorado theme spacing system (8 níveis)
+- ✅ Reduzido shadow opacity (minimalista)
+- ✅ Redesign completo da Home screen
+  - Streak banner → 2 cards separados
+  - Workout card moderno (gradient, 2 sections, badge)
+  - InsightPreviewCard novo componente
+  - Progress simplificado (2 stats)
+- ✅ Dashboard com period selector
+- ✅ Profile com ExpandableCards
+- ✅ Animações padronizadas (600ms, delays escalonados)

@@ -6,7 +6,7 @@ export const darkTheme = {
       tertiary: "#1E2747",
       paper: "#1A2238",
       card: "#1E2747",
-      overlay: "rgba(10, 15, 31, 0.8)",
+      overlay: "rgba(10, 15, 31, 0.8)"
     },
 
     text: {
@@ -14,20 +14,20 @@ export const darkTheme = {
       secondary: "#8B93B8",
       disabled: "#545A7A",
       inverse: "#0A0F1F",
-      placeholder: "#6B7280",
+      placeholder: "#6B7280"
     },
 
     primary: {
-      50: "#E3F2FD",
-      100: "#B3E5FC",
-      200: "#81D4FA",
-      300: "#4FC3F7",
-      400: "#29B6F6",
-      500: "#03A9F4",
-      600: "#039BE5",
-      700: "#0288D1",
-      800: "#0277BD",
-      900: "#01579B",
+      50: "#FFF5E6",
+      100: "#FFDBCC",
+      200: "#FFB84D",
+      300: "#FF9500",
+      400: "#FF8800",
+      500: "#FF7B00",
+      600: "#FF6B00",
+      700: "#FF5500",
+      800: "#FF4400",
+      900: "#FF3300"
     },
 
     secondary: {
@@ -40,7 +40,7 @@ export const darkTheme = {
       600: "#D81B60",
       700: "#C2185B",
       800: "#AD1457",
-      900: "#880E4F",
+      900: "#880E4F"
     },
 
     success: {
@@ -48,7 +48,7 @@ export const darkTheme = {
       100: "#C8E6C9",
       500: "#4CAF50",
       600: "#43A047",
-      700: "#388E3C",
+      700: "#388E3C"
     },
     warning: {
       50: "#FFF8E1",
@@ -56,20 +56,22 @@ export const darkTheme = {
       500: "#FFC107",
       600: "#FFB300",
       700: "#FFA000",
+      800: "#FF8F00",
+      900: "#FF6F00"
     },
     error: {
       50: "#FFEBEE",
       100: "#FFCDD2",
       500: "#F44336",
       600: "#E53935",
-      700: "#D32F2F",
+      700: "#D32F2F"
     },
     info: {
       50: "#E1F5FE",
       100: "#B3E5FC",
       500: "#03A9F4",
       600: "#039BE5",
-      700: "#0288D1",
+      700: "#0288D1"
     },
 
     gray: {
@@ -82,7 +84,7 @@ export const darkTheme = {
       600: "#4B5563",
       700: "#374151",
       800: "#1F2937",
-      900: "#111827",
+      900: "#111827"
     },
 
     border: "#2D3748",
@@ -91,26 +93,27 @@ export const darkTheme = {
     backdrop: "rgba(0, 0, 0, 0.5)",
 
     gradient: {
-      primary: ["#667eea", "#764ba2"],
+      primary: ["#FF7B00", "#FF9500"],
       secondary: ["#f093fb", "#f5576c"],
       success: ["#4facfe", "#00f2fe"],
-      warning: ["#43e97b", "#38f9d7"],
+      warning: ["#43e97b", "#38f9d7"]
     },
 
     chartGradient: {
       start: "#00aeffff",
-      end: "transparent",
-    },
+      end: "transparent"
+    }
   },
 
   spacing: {
     xs: 4,
     sm: 8,
-    md: 16,
-    lg: 24,
-    xl: 32,
-    xxl: 48,
-    xxxl: 64,
+    md: 12,
+    lg: 16,
+    xl: 24,
+    xxl: 32,
+    xxxl: 48,
+    xxxxl: 64
   },
 
   borderRadius: {
@@ -121,7 +124,7 @@ export const darkTheme = {
     xl: 16,
     "2xl": 20,
     "3xl": 24,
-    full: 9999,
+    full: 9999
   },
 
   typography: {
@@ -130,108 +133,108 @@ export const darkTheme = {
       lineHeight: 40,
       fontWeight: "700" as const,
       fontFamily: "TekoRegular",
-      letterSpacing: -0.5,
+      letterSpacing: -0.5
     },
     h2: {
       fontSize: 24,
       lineHeight: 32,
       fontWeight: "600" as const,
       fontFamily: "TekoRegular",
-      letterSpacing: -0.3,
+      letterSpacing: -0.3
     },
     h3: {
       fontSize: 20,
       lineHeight: 28,
       fontWeight: "600" as const,
       fontFamily: "TekoRegular",
-      letterSpacing: -0.2,
+      letterSpacing: -0.2
     },
     h4: {
       fontSize: 18,
       lineHeight: 24,
       fontWeight: "500" as const,
-      fontFamily: "TekoRegular",
+      fontFamily: "TekoRegular"
     },
     body: {
       fontSize: 16,
       lineHeight: 24,
       fontWeight: "400" as const,
-      fontFamily: "RobotoRegular",
+      fontFamily: "RobotoRegular"
     },
     bodyMedium: {
       fontSize: 16,
       lineHeight: 24,
       fontWeight: "500" as const,
-      fontFamily: "RobotoMedium",
+      fontFamily: "RobotoMedium"
     },
     caption: {
       fontSize: 14,
       lineHeight: 20,
       fontWeight: "400" as const,
-      fontFamily: "RobotoLight",
+      fontFamily: "RobotoLight"
     },
     captionMedium: {
       fontSize: 14,
       lineHeight: 20,
       fontWeight: "500" as const,
-      fontFamily: "RobotoMedium",
+      fontFamily: "RobotoMedium"
     },
     small: {
       fontSize: 12,
       lineHeight: 16,
       fontWeight: "400" as const,
-      fontFamily: "RobotoLight",
+      fontFamily: "RobotoLight"
     },
     button: {
       fontSize: 16,
       lineHeight: 24,
       fontWeight: "600" as const,
       fontFamily: "RobotoMedium",
-      textTransform: "uppercase" as const,
-    },
+      textTransform: "uppercase" as const
+    }
   },
 
   shadows: {
     sm: {
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.2,
+      shadowOpacity: 0.15,
       shadowRadius: 2,
-      elevation: 2,
+      elevation: 2
     },
     md: {
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25,
+      shadowOpacity: 0.2,
       shadowRadius: 4,
-      elevation: 4,
+      elevation: 4
     },
     lg: {
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.3,
+      shadowOpacity: 0.25,
       shadowRadius: 8,
-      elevation: 8,
+      elevation: 8
     },
     xl: {
       shadowColor: "#000",
       shadowOffset: { width: 0, height: 8 },
-      shadowOpacity: 0.4,
+      shadowOpacity: 0.3,
       shadowRadius: 16,
-      elevation: 16,
-    },
+      elevation: 16
+    }
   },
 
   animation: {
     scale: {
       pressed: 0.95,
-      hover: 1.05,
+      hover: 1.05
     },
     timing: {
       fast: 150,
       normal: 300,
-      slow: 500,
-    },
+      slow: 500
+    }
   },
 
   zIndex: {
@@ -240,6 +243,6 @@ export const darkTheme = {
     fixed: 1030,
     modal: 1040,
     popover: 1050,
-    tooltip: 1060,
-  },
-};
+    tooltip: 1060
+  }
+}
