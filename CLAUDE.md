@@ -396,6 +396,18 @@ withSpring(value, {
 
 ## Changelog
 
+### Jan 2026 - Workout Screen Gamificada (Duolingo-Style)
+- ✅ Redesign completo da tela de workout com path map serpentina
+- ✅ Novos componentes de gamificação:
+  - `ExerciseNode` - Nó com estados (completed, active, upcoming, locked)
+  - `PathConnector` - Linhas SVG conectando nós com animação
+  - `ExercisePathMap` - Mapa completo com layout serpentina
+  - `ActiveExerciseCard` - Card de exercício ativo com sets
+- ✅ Home Header simplificado (removido slot machine, treino fixo)
+- ✅ WorkoutCard simplificado (apenas CTA de iniciar)
+- ✅ Constantes de animação para path (`PATH_ANIMATION`, `NODE_SIZES`)
+- ✅ Two-view mode: mapa de overview e card de exercício
+
 ### Jan 2026 - Design System Minimalista Clean
 - ✅ Refatorado theme spacing system (8 níveis)
 - ✅ Reduzido shadow opacity (minimalista)
@@ -407,3 +419,147 @@ withSpring(value, {
 - ✅ Dashboard com period selector
 - ✅ Profile com ExpandableCards
 - ✅ Animações padronizadas (600ms, delays escalonados)
+
+---
+
+## Workout Execution - Gamified Path Map
+
+### Arquitetura da Tela de Workout
+
+A tela de workout (`src/app/workout/[id].tsx`) usa um sistema de duas visualizações:
+
+1. **Map View**: Mostra o caminho de exercícios em formato serpentina
+2. **Exercise View**: Mostra o card do exercício ativo com controles de sets
+
+```
+┌────────────────────────────────────┐
+│ [←] Peito + Tríceps    3/5 ●●●○○  │  ← Header com progress dots
+├────────────────────────────────────┤
+│                                    │
+│   PATH MAP (viewMode === 'map')    │
+│   ┌──────────────────────────┐     │
+│   │  ● Ex 1 ✓                │     │  ← Completed (verde)
+│   │   ╲                      │     │
+│   │    ● Ex 2 ✓              │     │
+│   │   ╱                      │     │
+│   │  ◉ Ex 3 (ATIVO)          │     │  ← Active (laranja, pulsando)
+│   │   ╲                      │     │
+│   │    ○ Ex 4                │     │  ← Upcoming (cinza)
+│   │   ╱                      │     │
+│   │  ○ Ex 5                  │     │  ← Locked (cinza escuro)
+│   └──────────────────────────┘     │
+│                                    │
+│   [ Iniciar Supino Reto → ]        │  ← CTA para exercise view
+└────────────────────────────────────┘
+```
+
+### Componentes do Path Map
+
+#### `ExerciseNode` (`src/components/workout-execution/ExerciseNode.tsx`)
+Nó individual representando um exercício no mapa.
+
+```tsx
+type NodeState = "completed" | "active" | "upcoming" | "locked"
+
+interface ExerciseNodeProps {
+  exercise: WorkoutExercise
+  index: number
+  state: NodeState
+  position: "left" | "center" | "right"  // Para layout serpentina
+  onPress?: () => void
+  totalExercises: number
+}
+```
+
+**Estados visuais**:
+- `completed`: Círculo verde com ✓, nome riscado
+- `active`: Círculo laranja pulsando, badge "AGORA"
+- `upcoming`: Círculo cinza com número
+- `locked`: Círculo cinza escuro com 🔒
+
+#### `PathConnector` (`src/components/workout-execution/PathConnector.tsx`)
+Linha SVG conectando nós com curvas Bezier.
+
+```tsx
+type ConnectorDirection =
+  | "left-to-center"
+  | "center-to-right"
+  | "right-to-center"
+  | "center-to-left"
+
+interface PathConnectorProps {
+  direction: ConnectorDirection
+  isCompleted: boolean
+  height?: number
+}
+```
+
+**Animações**:
+- Linha tracejada quando incompleta
+- Preenche com gradiente quando completa (600ms)
+
+#### `ExercisePathMap` (`src/components/workout-execution/ExercisePathMap.tsx`)
+Mapa completo integrando nós e conectores.
+
+```tsx
+interface ExercisePathMapProps {
+  exercises: WorkoutExercise[]
+  currentIndex: number
+  completedIndices: number[]
+  onExercisePress?: (index: number) => void
+}
+```
+
+**Features**:
+- Layout serpentina automático (left → center → right → center → ...)
+- Auto-scroll para exercício ativo
+- Conectores com direção calculada automaticamente
+
+#### `ActiveExerciseCard` (`src/components/workout-execution/ActiveExerciseCard.tsx`)
+Card expandido para executar exercício.
+
+```tsx
+interface ActiveExerciseCardProps {
+  exercise: WorkoutExercise
+  sets: ActiveSet[]
+  completedSetsCount: number
+  exerciseIndex: number
+  totalExercises: number
+  isLastExercise: boolean
+  onSetComplete: (setIndex: number) => void
+  onAdjustWeight: (setIndex: number, delta: number) => void
+  onAdjustReps: (setIndex: number, delta: number) => void
+  onNextExercise: () => void
+}
+```
+
+### Constantes de Animação
+
+```tsx
+// src/utils/constants.ts
+
+export const PATH_ANIMATION = {
+  nodeEntryDelay: 80,      // Delay entre nós na entrada
+  nodeEntryDuration: 400,  // Duração da animação de entrada
+  pulseDuration: 800,      // Duração do pulse do nó ativo
+  pulseScale: 1.1,         // Escala máxima do pulse
+  pathFillDuration: 600,   // Duração do preenchimento da linha
+  completionDelay: 200,    // Delay antes da animação de conclusão
+  completionDuration: 500, // Duração da animação de conclusão
+}
+
+export const NODE_SIZES = {
+  default: 64,
+  active: 72,
+  completed: 64,
+}
+```
+
+### Fluxo de Navegação
+
+1. Home → Toca "Iniciar Treino"
+2. Workout Map View → Vê visão geral do treino
+3. Toca "Iniciar [Exercício]" → Exercise View
+4. Completa sets → Volta para Map View (com nó marcado)
+5. Repete até último exercício
+6. Finaliza → Volta para Home

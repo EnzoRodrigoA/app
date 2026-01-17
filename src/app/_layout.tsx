@@ -37,10 +37,6 @@ function LayoutWithAuth() {
             options={{ headerShown: false, animation: "slide_from_right" }}
           />
           <Stack.Screen
-            name="workout-exercises/[id]"
-            options={{ headerShown: false, animation: "slide_from_left" }}
-          />
-          <Stack.Screen
             name="workout/[id]"
             options={{ headerShown: false, animation: "slide_from_right" }}
           />

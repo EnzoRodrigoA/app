@@ -1,15 +1,14 @@
 import { AnimatedIcon } from "@/components/UI/animated-icon"
 import { Card } from "@/components/UI/Card"
-import { Skeleton } from "@/components/UI/Feedback/Skeleton"
 import ParallaxScrollView from "@/components/UI/Layout/ParallaxScrollView"
 import { ExpandableCard } from "@/components/UI/Lists/ExpandableCard"
 import { Text } from "@/components/UI/Text"
 import { useAuth } from "@/contexts/AuthContext"
 import { useTheme } from "@/contexts/ThemeContext"
-import api from "@/services/api"
+import { MOCK_USER, MOCK_USER_STATS } from "@/data/mockData"
+import { USER_GOAL_LABELS } from "@/types"
 import { Ionicons } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
-import { useEffect, useState } from "react"
 import { Pressable, StyleSheet, View } from "react-native"
 import Animated, { FadeInRight } from "react-native-reanimated"
 
@@ -17,159 +16,177 @@ export default function UserProfileScreen() {
   const { logout, isLoggedIn } = useAuth()
   const { theme } = useTheme()
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
-
-  const [user, setUser] = useState<{ username: string; email: string } | null>(null)
-  const [settings, setSettings] = useState<{
-    weight: number
-    height: number
-    goal: string
-  } | null>(null)
+  void isLoggedIn
+  const user = MOCK_USER
+  const stats = MOCK_USER_STATS
+  const settings = {
+    weight: 78,
+    height: 178,
+    goal: USER_GOAL_LABELS[user.goal] ?? "Hipertrofia"
+  }
 
   const handleLogout = async () => {
     await logout()
     router.replace("/sign-in")
   }
-
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true)
-      try {
-        const [userResponse, settingsResponse] = await Promise.all([
-          api.get("/user"),
-          api.get("/user-settings")
-        ])
-        setUser(userResponse.data)
-        if (!settingsResponse.data) {
-          router.replace("/onboarding")
-        } else {
-          setSettings(settingsResponse.data)
-        }
-      } catch (err) {
-        console.error("Erro ao buscar dados:", err)
-      } finally {
-        setLoading(false)
-      }
+  const formatVolume = (value: number) => {
+    if (value >= 1000000) {
+      return `${(value / 1000000).toFixed(1)}t`
     }
-    fetchData()
-  }, [isLoggedIn, router])
+    if (value >= 1000) {
+      return `${(value / 1000).toFixed(1)}k kg`
+    }
+    return `${value} kg`
+  }
 
-  return loading && !settings ? (
-    <View style={[styles.skeletonContainer, { backgroundColor: theme.colors.background.primary }]}>
-      <Skeleton
-        style={{
-          width: "80%",
-          height: 80,
-          marginBottom: 16
-        }}
-      />
-      <Skeleton style={{ width: "100%", height: 200, marginBottom: 12 }} />
-      <Skeleton style={{ width: "100%", height: 60 }} />
-    </View>
-  ) : (
+  return (
     <ParallaxScrollView
       title={
-        !loading && user ? (
+        user ? (
           <>
-            Olá {user?.username}! <AnimatedIcon emoji="👋" />
+            Olá {user.name}! <AnimatedIcon emoji="👋" />
           </>
         ) : undefined
       }
-      subtitle={!loading && user ? user?.email : undefined}
+      subtitle={user ? user.email : undefined}
     >
       <View style={styles.content}>
-        {/* Dados Pessoais Card */}
-        <Animated.View entering={FadeInRight.duration(600).delay(300)}>
-          {settings && (
-            <Card variant="elevated" style={styles.infoCard}>
-              <View style={styles.cardHeader}>
-                <Text variant="h3">Dados Pessoais</Text>
-                <Pressable style={styles.editButton}>
-                  <Ionicons name="create-outline" size={20} color={theme.colors.primary[500]} />
-                </Pressable>
+        <Animated.View entering={FadeInRight.duration(600).delay(200)}>
+          <Card variant="elevated" style={styles.heroCard}>
+            <View style={styles.heroHeader}>
+              <View style={styles.avatar}>
+                <Text variant="h3" style={{ color: theme.colors.primary[700] }}>
+                  {user?.name?.charAt(0) ?? "U"}
+                </Text>
               </View>
-
-              <View style={styles.infoRows}>
-                <View style={styles.row}>
-                  <View
-                    style={[styles.iconContainer, { backgroundColor: theme.colors.primary[50] }]}
-                  >
-                    <Ionicons name="barbell-outline" size={20} color={theme.colors.primary[500]} />
-                  </View>
-                  <View style={styles.rowContent}>
-                    <Text variant="caption" color="secondary">
-                      Objetivo
-                    </Text>
-                    <Text variant="bodyMedium">{settings.goal}</Text>
-                  </View>
-                </View>
-
-                <View style={styles.row}>
-                  <View
-                    style={[styles.iconContainer, { backgroundColor: theme.colors.success[50] }]}
-                  >
-                    <Ionicons name="fitness-outline" size={20} color={theme.colors.success[500]} />
-                  </View>
-                  <View style={styles.rowContent}>
-                    <Text variant="caption" color="secondary">
-                      Peso
-                    </Text>
-                    <Text variant="bodyMedium">{settings.weight} kg</Text>
-                  </View>
-                </View>
-
-                <View style={styles.row}>
-                  <View
-                    style={[styles.iconContainer, { backgroundColor: theme.colors.warning[50] }]}
-                  >
-                    <Ionicons name="body-outline" size={20} color={theme.colors.warning[500]} />
-                  </View>
-                  <View style={styles.rowContent}>
-                    <Text variant="caption" color="secondary">
-                      Altura
-                    </Text>
-                    <Text variant="bodyMedium">{settings.height} cm</Text>
-                  </View>
-                </View>
+              <View style={styles.heroTitle}>
+                <Text variant="h2">{user?.name}</Text>
+                <Text variant="body" color="secondary">
+                  {user?.email}
+                </Text>
               </View>
-            </Card>
-          )}
+            </View>
+
+            <View style={styles.heroChipsRow}>
+              <View style={[styles.chip, { backgroundColor: theme.colors.primary[50] }]}>
+                <Ionicons name="flame" size={16} color={theme.colors.primary[700]} />
+                <Text variant="captionMedium" style={{ color: theme.colors.primary[700] }}>
+                  {stats.currentStreak} dias de streak
+                </Text>
+              </View>
+              <View style={[styles.chip, { backgroundColor: theme.colors.success[50] }]}>
+                <Ionicons name="barbell-outline" size={16} color={theme.colors.success[600]} />
+                <Text variant="captionMedium" style={{ color: theme.colors.success[600] }}>
+                  {stats.weeklyCompleted}/{stats.weeklyGoal} na semana
+                </Text>
+              </View>
+            </View>
+
+            <View
+              style={[styles.heroStats, { backgroundColor: theme.colors.background.secondary }]}
+            >
+              <View style={styles.heroStatItem}>
+                <Text variant="caption" color="secondary">
+                  Total de treinos
+                </Text>
+                <Text variant="h3" color="primary">
+                  {stats.totalWorkouts}
+                </Text>
+              </View>
+              <View style={[styles.heroStatDivider, { backgroundColor: theme.colors.border }]} />
+              <View style={styles.heroStatItem}>
+                <Text variant="caption" color="secondary">
+                  Volume acumulado
+                </Text>
+                <Text variant="h3" color="success">
+                  {formatVolume(stats.totalVolume)}
+                </Text>
+              </View>
+            </View>
+          </Card>
         </Animated.View>
 
-        {/* Estatísticas Rápidas */}
-        <Animated.View entering={FadeInRight.duration(600).delay(400)}>
+        <Animated.View entering={FadeInRight.duration(600).delay(320)}>
+          <Card variant="elevated" style={styles.infoCard}>
+            <View style={styles.cardHeader}>
+              <Text variant="h3">Dados Pessoais</Text>
+              <Pressable style={styles.editButton}>
+                <Ionicons name="create-outline" size={20} color={theme.colors.primary[500]} />
+              </Pressable>
+            </View>
+
+            <View style={styles.infoRows}>
+              <View style={styles.row}>
+                <View style={[styles.iconContainer, { backgroundColor: theme.colors.primary[50] }]}>
+                  <Ionicons name="barbell-outline" size={20} color={theme.colors.primary[600]} />
+                </View>
+                <View style={styles.rowContent}>
+                  <Text variant="caption" color="secondary">
+                    Objetivo
+                  </Text>
+                  <Text variant="bodyMedium">{settings.goal}</Text>
+                </View>
+              </View>
+
+              <View style={styles.row}>
+                <View style={[styles.iconContainer, { backgroundColor: theme.colors.success[50] }]}>
+                  <Ionicons name="fitness-outline" size={20} color={theme.colors.success[600]} />
+                </View>
+                <View style={styles.rowContent}>
+                  <Text variant="caption" color="secondary">
+                    Peso
+                  </Text>
+                  <Text variant="bodyMedium">{settings.weight} kg</Text>
+                </View>
+              </View>
+
+              <View style={styles.row}>
+                <View style={[styles.iconContainer, { backgroundColor: theme.colors.warning[50] }]}>
+                  <Ionicons name="body-outline" size={20} color={theme.colors.warning[600]} />
+                </View>
+                <View style={styles.rowContent}>
+                  <Text variant="caption" color="secondary">
+                    Altura
+                  </Text>
+                  <Text variant="bodyMedium">{settings.height} cm</Text>
+                </View>
+              </View>
+            </View>
+          </Card>
+        </Animated.View>
+
+        <Animated.View entering={FadeInRight.duration(600).delay(420)}>
           <ExpandableCard title="Estatísticas" subtitle="Seus números gerais" showActions={false}>
             <View style={styles.statsContainer}>
               <View style={styles.statRow}>
                 <Text variant="caption" color="secondary">
-                  Total de Treinos
+                  Sequência atual
                 </Text>
                 <Text variant="h3" color="primary">
-                  24
+                  {stats.currentStreak} dias
                 </Text>
               </View>
               <View style={styles.statRow}>
                 <Text variant="caption" color="secondary">
-                  Volume Total
+                  Volume total
                 </Text>
                 <Text variant="h3" color="success">
-                  1.2t
+                  {formatVolume(stats.totalVolume)}
                 </Text>
               </View>
               <View style={styles.statRow}>
                 <Text variant="caption" color="secondary">
-                  Dias Ativos
+                  Melhor sequência
                 </Text>
                 <Text variant="h3" color="warning">
-                  45
+                  {stats.longestStreak} dias
                 </Text>
               </View>
             </View>
           </ExpandableCard>
         </Animated.View>
 
-        {/* Preferências */}
-        <Animated.View entering={FadeInRight.duration(600).delay(500)}>
+        <Animated.View entering={FadeInRight.duration(600).delay(520)}>
           <ExpandableCard
             title="Preferências"
             subtitle="Personalize sua experiência"
@@ -212,11 +229,10 @@ export default function UserProfileScreen() {
           </ExpandableCard>
         </Animated.View>
 
-        {/* Conta - Logout */}
-        <Animated.View entering={FadeInRight.duration(600).delay(600)}>
+        <Animated.View entering={FadeInRight.duration(600).delay(620)}>
           <Card
             variant="outlined"
-            style={[styles.logoutCard, { borderColor: theme.colors.error[200] }]}
+            style={[styles.logoutCard, { borderColor: theme.colors.error[500] }]}
           >
             <Pressable onPress={handleLogout} style={styles.logoutButton}>
               <View style={styles.logoutContent}>
@@ -241,15 +257,62 @@ export default function UserProfileScreen() {
 }
 
 const styles = StyleSheet.create({
-  skeletonContainer: {
-    flex: 1,
-    justifyContent: "flex-start",
-    paddingTop: 70,
-    paddingHorizontal: 24
-  },
   content: {
-    paddingHorizontal: 24,
     gap: 16
+  },
+
+  heroCard: {
+    padding: 20,
+    borderRadius: 16,
+    gap: 16
+  },
+  heroHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12
+  },
+  avatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.9)",
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  heroTitle: {
+    flex: 1,
+    gap: 2
+  },
+  heroChipsRow: {
+    flexDirection: "row",
+    gap: 8,
+    flexWrap: "wrap"
+  },
+  chip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6
+  },
+  heroStats: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    backgroundColor: "rgba(0,0,0,0.02)",
+    borderRadius: 12,
+    padding: 12
+  },
+  heroStatItem: {
+    flex: 1,
+    gap: 4
+  },
+  heroStatDivider: {
+    width: 1,
+    height: 40,
+    backgroundColor: "rgba(0,0,0,0.06)",
+    marginHorizontal: 12
   },
 
   // Info Card

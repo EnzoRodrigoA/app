@@ -32,7 +32,7 @@ export default function HomeScreen() {
   const insets = useSafeAreaInsets()
 
   // Custom hooks for data and actions
-  const { workout, stats, userName, loading, refreshing, refresh } = useHomeData()
+  const { workout, stats, loading, refreshing, refresh } = useHomeData()
   const { startWorkout, configureWorkout } = useWorkoutActions()
   const { progress } = useWeeklyProgress(stats)
 
@@ -68,16 +68,9 @@ export default function HomeScreen() {
       showsVerticalScrollIndicator={false}
     >
       <HomeHeader
-        userName={userName}
         currentStreak={stats?.currentStreak ?? 0}
         workoutName={workout?.workout?.name}
         onAvatarPress={handleAvatarPress}
-      />
-
-      <WeeklyProgressCard
-        completed={stats?.weeklyCompleted ?? 0}
-        goal={stats?.weeklyGoal ?? 5}
-        progress={progress}
       />
 
       <WorkoutCard
@@ -87,13 +80,19 @@ export default function HomeScreen() {
         onConfigure={configureWorkout}
       />
 
+      <ProgressStatsCard stats={stats} />
+
+      <WeeklyProgressCard
+        completed={stats?.weeklyCompleted ?? 0}
+        goal={stats?.weeklyGoal ?? 5}
+        progress={progress}
+      />
+
       <InsightPreviewCard
         weeklyData={weeklyData}
         trend={15}
         totalWorkouts={stats?.weeklyCompleted ?? 0}
       />
-
-      <ProgressStatsCard stats={stats} />
 
       <TipCard streak={stats?.currentStreak ?? 0} />
 

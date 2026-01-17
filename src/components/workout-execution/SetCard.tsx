@@ -28,7 +28,7 @@ export function SetCard({
     transform: [{ scale: scale.value }]
   }))
 
-  const handleCompleteLongPress = () => {
+  const handleCompletePress = () => {
     if (set.completed || !isActive) return
     scale.value = withSpring(0.95, {}, () => {
       scale.value = withSpring(1)
@@ -40,127 +40,197 @@ export function SetCard({
   const weightDiff = hasGhostData ? set.weight - (set.previousWeight || 0) : 0
 
   return (
-    <Animated.View entering={FadeInDown.delay(index * 100)}>
+    <Animated.View entering={FadeInDown.delay(index * 50)}>
       <Animated.View style={animatedStyle}>
-        <View
+        <Pressable
+          onPress={handleCompletePress}
+          disabled={!isActive || set.completed}
           style={[
             styles.setCard,
             {
               backgroundColor: set.completed
-                ? `${theme.colors.success[500]}15`
+                ? theme.colors.success[500]
                 : isActive
-                  ? theme.colors.background.secondary
-                  : theme.colors.background.tertiary,
-              borderColor: isActive ? theme.colors.primary[500] : "transparent",
-              borderWidth: isActive ? 2 : 0,
-              opacity: !isActive && !set.completed ? 0.5 : 1
+                ? theme.colors.primary[500]
+                : theme.colors.gray[100],
+              borderWidth: 0,
+              opacity: !isActive && !set.completed ? 0.6 : 1
             }
           ]}
         >
-          {/* Set Number */}
-          <Pressable
-            style={styles.setNumber}
-            onLongPress={handleCompleteLongPress}
-            delayLongPress={350}
-            hitSlop={12}
-            disabled={set.completed || !isActive}
+          {/* Set Number Circle */}
+          <View
+            style={[
+              styles.setNumber,
+              {
+                backgroundColor: set.completed
+                  ? "rgba(255,255,255,0.3)"
+                  : isActive
+                  ? "rgba(255,255,255,0.25)"
+                  : theme.colors.gray[200]
+              }
+            ]}
           >
-            {set.completed ? (
-              <Ionicons name="checkmark-circle" size={24} color={theme.colors.success[500]} />
-            ) : (
-              <View
-                style={[
-                  styles.setNumberCircle,
-                  {
-                    backgroundColor: isActive
-                      ? theme.colors.primary[500]
-                      : theme.colors.background.tertiary
-                  }
-                ]}
-              >
-                {isActive ? (
-                  <Ionicons
-                    name="finger-print-outline"
-                    variant="bodyMedium"
-                    size={22}
-                    style={{ color: isActive ? "white" : theme.colors.text.secondary }}
-                  />
-                ) : (
-                  <Text variant="bodyMedium" style={{ color: theme.colors.primary[500] }}>
-                    {index + 1}
-                  </Text>
-                )}
-              </View>
-            )}
-          </Pressable>
+            <Text
+              variant="bodyMedium"
+              style={{
+                color: set.completed || isActive ? "white" : theme.colors.text.primary,
+                fontWeight: "800",
+                fontSize: 16
+              }}
+            >
+              {index + 1}
+            </Text>
+          </View>
 
-          {/* Weight */}
-          <View style={styles.setMetric}>
-            <View style={styles.metricAdjust}>
-              {isActive && !set.completed && (
-                <Pressable
-                  onPress={() => onAdjustWeight(-2.5)}
-                  style={styles.adjustButton}
-                  hitSlop={12}
-                >
-                  <Ionicons name="remove" size={16} color={theme.colors.text.secondary} />
-                </Pressable>
-              )}
-              <View style={styles.metricValue}>
-                <Text variant="h3">{set.weight}</Text>
-                <Text variant="caption" color="secondary">
-                  kg
-                </Text>
-              </View>
-              {isActive && !set.completed && (
-                <Pressable
-                  onPress={() => onAdjustWeight(2.5)}
-                  style={styles.adjustButton}
-                  hitSlop={12}
-                >
-                  <Ionicons name="add" size={16} color={theme.colors.text.secondary} />
-                </Pressable>
-              )}
-            </View>
-            {hasGhostData && weightDiff !== 0 && (
+          {/* Main Content */}
+          <View style={styles.contentSection}>
+            {/* Weight */}
+            <View style={styles.metricBox}>
+              <Text
+                style={{
+                  color: set.completed || isActive ? "white" : theme.colors.text.primary,
+                  fontWeight: "900",
+                  fontSize: 20
+                }}
+              >
+                {set.weight}
+              </Text>
               <Text
                 variant="small"
                 style={{
-                  color: weightDiff > 0 ? theme.colors.success[500] : theme.colors.error[500]
+                  color:
+                    set.completed || isActive
+                      ? "rgba(255,255,255,0.8)"
+                      : theme.colors.text.secondary,
+                  fontSize: 11,
+                  fontWeight: "600"
                 }}
               >
-                {weightDiff > 0 ? "+" : ""}
-                {weightDiff}kg
+                kg
               </Text>
-            )}
-          </View>
-
-          {/* Reps */}
-          <View style={styles.setMetric}>
-            <View style={styles.metricAdjust}>
-              {isActive && !set.completed && (
-                <Pressable
-                  onPress={() => onAdjustReps(-1)}
-                  style={styles.adjustButton}
-                  hitSlop={12}
+              {hasGhostData && weightDiff !== 0 && (
+                <Text
+                  style={{
+                    color:
+                      set.completed || isActive
+                        ? "white"
+                        : weightDiff > 0
+                        ? theme.colors.success[500]
+                        : theme.colors.error[500],
+                    fontSize: 10,
+                    fontWeight: "700",
+                    marginTop: 2
+                  }}
                 >
-                  <Ionicons name="remove" size={16} color={theme.colors.text.secondary} />
-                </Pressable>
-              )}
-              <View style={styles.metricValue}>
-                <Text variant="h3">{set.reps}</Text>
-                <Text variant="caption" color="secondary">
-                  reps
+                  {weightDiff > 0 ? "↑" : "↓"} {Math.abs(weightDiff)}
                 </Text>
-              </View>
-              {isActive && !set.completed && (
-                <Pressable onPress={() => onAdjustReps(1)} style={styles.adjustButton} hitSlop={12}>
-                  <Ionicons name="add" size={16} color={theme.colors.text.secondary} />
-                </Pressable>
               )}
             </View>
+
+            {/* Reps */}
+            <View style={styles.metricBox}>
+              <Text
+                style={{
+                  color: set.completed || isActive ? "white" : theme.colors.text.primary,
+                  fontWeight: "900",
+                  fontSize: 20
+                }}
+              >
+                {set.reps}
+              </Text>
+              <Text
+                variant="small"
+                style={{
+                  color:
+                    set.completed || isActive
+                      ? "rgba(255,255,255,0.8)"
+                      : theme.colors.text.secondary,
+                  fontSize: 11,
+                  fontWeight: "600"
+                }}
+              >
+                reps
+              </Text>
+            </View>
           </View>
-        </View>
+
+          {/* Status Indicator */}
+          <View style={styles.statusIcon}>
+            {set.completed ? (
+              <Ionicons name="checkmark-done-circle" size={28} color="white" />
+            ) : isActive ? (
+              <View style={[styles.pulseCircle, { borderColor: "white" }]} />
+            ) : null}
+          </View>
+        </Pressable>
+
+        {/* Controls Row */}
+        {isActive && !set.completed && (
+          <View style={styles.controlsRow}>
+            <View style={styles.controlGroup}>
+              <Text
+                variant="small"
+                style={{
+                  color: theme.colors.text.secondary,
+                  fontWeight: "700",
+                  fontSize: 11,
+                  textTransform: "uppercase",
+                  letterSpacing: 0.5
+                }}
+              >
+                Peso
+              </Text>
+              <View style={styles.controlButtons}>
+                <Pressable
+                  onPress={() => onAdjustWeight(-2.5)}
+                  style={[styles.controlBtn, { backgroundColor: theme.colors.error[500] }]}
+                  hitSlop={10}
+                >
+                  <Ionicons name="remove" size={16} color="white" />
+                </Pressable>
+                <Pressable
+                  onPress={() => onAdjustWeight(2.5)}
+                  style={[styles.controlBtn, { backgroundColor: theme.colors.success[500] }]}
+                  hitSlop={10}
+                >
+                  <Ionicons name="add" size={16} color="white" />
+                </Pressable>
+              </View>
+            </View>
+
+            <View style={styles.controlGroup}>
+              <Text
+                variant="small"
+                style={{
+                  color: theme.colors.text.secondary,
+                  fontWeight: "700",
+                  fontSize: 11,
+                  textTransform: "uppercase",
+                  letterSpacing: 0.5
+                }}
+              >
+                Reps
+              </Text>
+              <View style={styles.controlButtons}>
+                <Pressable
+                  onPress={() => onAdjustReps(-1)}
+                  style={[styles.controlBtn, { backgroundColor: theme.colors.error[500] }]}
+                  hitSlop={10}
+                >
+                  <Ionicons name="remove" size={16} color="white" />
+                </Pressable>
+                <Pressable
+                  onPress={() => onAdjustReps(1)}
+                  style={[styles.controlBtn, { backgroundColor: theme.colors.success[500] }]}
+                  hitSlop={10}
+                >
+                  <Ionicons name="add" size={16} color="white" />
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        )}
       </Animated.View>
     </Animated.View>
   )
@@ -170,49 +240,88 @@ const styles = StyleSheet.create({
   setCard: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
-    borderRadius: 12,
-    gap: 12
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderRadius: 18,
+    gap: 14,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3
   },
 
   setNumber: {
-    width: 40,
-    alignItems: "center"
-  },
-
-  setNumberCircle: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
+    flexShrink: 0
   },
 
-  setMetric: {
+  contentSection: {
     flex: 1,
-    alignItems: "center"
-  },
-
-  metricAdjust: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8
+    gap: 20
   },
-  metricValue: {
+
+  metricBox: {
     alignItems: "center",
-    minWidth: 50
+    justifyContent: "center"
   },
-  adjustButton: {
+
+  statusIcon: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 4
+  },
+
+  pulseCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    opacity: 0.6
+  },
+
+  controlsRow: {
+    flexDirection: "row",
+    gap: 16,
+    paddingTop: 12,
+    marginTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.1)",
+    marginHorizontal: 16,
+    paddingHorizontal: 0
+  },
+
+  controlGroup: {
+    flex: 1,
+    gap: 8,
+    alignItems: "center"
+  },
+
+  controlButtons: {
+    flexDirection: "row",
+    gap: 8,
+    width: "100%"
+  },
+
+  controlBtn: {
+    flex: 1,
+    height: 36,
+    borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(128,128,128,0.2)"
-  },
-  oneTapHint: {
-    position: "absolute",
-    right: 16,
-    top: 16
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2
   }
 })

@@ -18,29 +18,29 @@ export const lightTheme = {
     },
 
     primary: {
-      50: "#FFF5E6",
-      100: "#FFDBCC",
-      200: "#FFB84D",
-      300: "#FF9500",
-      400: "#FF8800",
-      500: "#FF7B00",
-      600: "#FF6B00",
-      700: "#FF5500",
-      800: "#FF4400",
-      900: "#FF3300"
+      50: "#EEF3FF",
+      100: "#D9E4FF",
+      200: "#B0C7FF",
+      300: "#86A9FF",
+      400: "#5C8BFF",
+      500: "#3C7CFF",
+      600: "#2C69F2",
+      700: "#1E53D6",
+      800: "#143EA8",
+      900: "#0E2F7A"
     },
 
     secondary: {
-      50: "#FFF3E0",
-      100: "#FFE0B2",
-      200: "#FFCC80",
-      300: "#FFB74D",
-      400: "#FFA726",
-      500: "#FF9800",
-      600: "#FB8C00",
-      700: "#F57C00",
-      800: "#EF6C00",
-      900: "#E65100"
+      50: "#E6FBFF",
+      100: "#C9F5FF",
+      200: "#8FE9FF",
+      300: "#56DBFF",
+      400: "#2BCCFF",
+      500: "#18C8FF",
+      600: "#12ACDC",
+      700: "#0D8AB3",
+      800: "#0A688A",
+      900: "#06455C"
     },
 
     success: {
@@ -93,14 +93,14 @@ export const lightTheme = {
     backdrop: "rgba(0, 0, 0, 0.3)",
 
     gradient: {
-      primary: ["#FF7B00", "#FF9500"],
-      secondary: ["#43e97b", "#38f9d7"],
+      primary: ["#3C7CFF", "#6A9BFF"],
+      secondary: ["#18C8FF", "#6DFFE8"],
       success: ["#4facfe", "#00f2fe"],
       warning: ["#fa709a", "#fee140"]
     },
 
     chartGradient: {
-      start: "#7ad5ff2d",
+      start: "#4c8dff33",
       end: "transparent"
     }
   },

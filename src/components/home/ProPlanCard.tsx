@@ -14,7 +14,12 @@ export function ProPlanCard() {
 
   return (
     <View style={styles.container}>
-      <Card style={styles.card}>
+      <Card
+        style={[
+          styles.card,
+          { backgroundColor: theme.colors.background.paper, borderColor: theme.colors.border }
+        ]}
+      >
         <View style={styles.content}>
           <Image
             source={require("../../assets/images/pro-plan-icon.png")}
@@ -46,13 +51,12 @@ export function ProPlanCard() {
 
 const styles = StyleSheet.create({
   container: {
-    marginHorizontal: 16,
-    marginVertical: 20,
-    marginBottom: 40
+    marginBottom: 22
   },
   card: {
     padding: 20,
-    borderRadius: 16,
+    borderRadius: 20,
+    borderWidth: 1,
     alignItems: "center"
   },
   content: {
@@ -60,8 +64,8 @@ const styles = StyleSheet.create({
     width: "100%"
   },
   image: {
-    width: 220,
-    height: 220,
+    width: 320,
+    height: 320,
     marginBottom: 16
   },
   textContainer: {
